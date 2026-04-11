@@ -123,3 +123,4 @@ import { SunIcon } from '@heroicons/react/24/outline';
 6. **Dark theme default** — Follows system preference, user can toggle
 7. **English default** — User can switch to Spanish
 8. **No flash on load** — Theme colors and language applied via inline blocking scripts in layout, data sourced from `themes.ts` and locale JSONs at build time via `define:vars`
+9. **No fallback texts in HTML** — Elements with `data-i18n` must have empty content. The inline i18n script fills them before paint. Never put hardcoded text as fallback.

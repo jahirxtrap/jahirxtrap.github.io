@@ -3,4 +3,5 @@ dist/
 .astro/
 .idea/
 .env
-.env.*
+.env.local
+.env.production

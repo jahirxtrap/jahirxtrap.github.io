@@ -1,187 +1,193 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import {ArrowDownTrayIcon} from '@heroicons/react/24/outline';
 ---
 
 <BaseLayout title="jahirtrap — Minecraft Mods">
     <div class="space-y-6">
         <div class="text-center">
-            <h1 class="text-3xl font-bold text-app-text-primary" data-i18n="mods.title">Minecraft Mods</h1>
-            <p class="text-app-text-secondary mt-2" data-i18n="mods.subtitle">Multiloader mods for Fabric, Forge, and NeoForge</p>
+            <h1 class="text-3xl font-bold text-app-text-primary" data-i18n="mods.title"></h1>
+            <p class="text-app-text-secondary mt-2" data-i18n="mods.subtitle"></p>
             <div class="flex flex-wrap items-center justify-center gap-2 mt-3" id="total-stats"></div>
         </div>
 
         <!-- Tabs -->
         <div class="flex justify-center gap-2">
-            <button id="tab-mods" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer" data-i18n="mods.mods_title">Mods</button>
-            <button id="tab-packs" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer" data-i18n="mods.packs_title">Resource Packs</button>
+            <button id="tab-mods" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer"
+                    data-i18n="mods.mods_title"></button>
+            <button id="tab-packs" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer"
+                    data-i18n="mods.packs_title"></button>
         </div>
 
-        <div id="content-loading" class="text-center text-app-text-secondary py-12" data-i18n="mods.loading">
-            Loading mods...
-        </div>
+        <div id="content-loading" class="text-center text-app-text-secondary py-12" data-i18n="mods.loading"></div>
 
         <div id="mods-grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 hidden"></div>
         <div id="packs-grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 hidden"></div>
     </div>
 
     <script>
-        import { fetchMergedProjects, formatDownloads, type MergedProject } from '@/utils/api';
-        import { getLang, t } from '@/utils/i18n';
+      import {fetchMergedProjects, formatDownloads, type MergedProject} from '@/utils/api';
+      import {getLang, t} from '@/utils/i18n';
 
-        let activeTab = 'mods';
+      let activeTab = 'mods';
 
-        function updateTabs() {
-            const tabMods = document.getElementById('tab-mods')!;
-            const tabPacks = document.getElementById('tab-packs')!;
-            const modsGrid = document.getElementById('mods-grid')!;
-            const packsGrid = document.getElementById('packs-grid')!;
+      function updateTabs() {
+        const tabMods = document.getElementById('tab-mods')!;
+        const tabPacks = document.getElementById('tab-packs')!;
+        const modsGrid = document.getElementById('mods-grid')!;
+        const packsGrid = document.getElementById('packs-grid')!;
 
-            if (activeTab === 'mods') {
-                tabMods.className = 'px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer bg-app-accent text-app-text-inverse';
-                tabPacks.className = 'px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer bg-app-surface text-app-text-secondary hover:text-app-text-primary';
-                modsGrid.classList.remove('hidden');
-                packsGrid.classList.add('hidden');
-            } else {
-                tabPacks.className = 'px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer bg-app-accent text-app-text-inverse';
-                tabMods.className = 'px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer bg-app-surface text-app-text-secondary hover:text-app-text-primary';
-                packsGrid.classList.remove('hidden');
-                modsGrid.classList.add('hidden');
-            }
+        if (activeTab === 'mods') {
+          tabMods.className = 'px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer bg-app-accent text-app-text-inverse';
+          tabPacks.className = 'px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer bg-app-surface text-app-text-secondary hover:text-app-text-primary';
+          modsGrid.classList.remove('hidden');
+          packsGrid.classList.add('hidden');
+        } else {
+          tabPacks.className = 'px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer bg-app-accent text-app-text-inverse';
+          tabMods.className = 'px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer bg-app-surface text-app-text-secondary hover:text-app-text-primary';
+          packsGrid.classList.remove('hidden');
+          modsGrid.classList.add('hidden');
+        }
+      }
+
+      document.getElementById('tab-mods')!.addEventListener('click', () => {
+        activeTab = 'mods';
+        updateTabs();
+      });
+      document.getElementById('tab-packs')!.addEventListener('click', () => {
+        activeTab = 'packs';
+        updateTabs();
+      });
+
+      function createProjectCard(project: MergedProject): HTMLElement {
+        const card = document.createElement('a');
+        card.href = project.linkUrl;
+        card.target = '_blank';
+        card.rel = 'noopener';
+        card.className = 'group p-4 rounded-xl border border-app-border bg-app-surface hover:bg-app-surface-dark transition-colors';
+
+        const header = document.createElement('div');
+        header.className = 'flex items-center gap-3 mb-3';
+
+        if (project.icon_url) {
+          const img = document.createElement('img');
+          img.src = project.icon_url;
+          img.alt = project.title;
+          img.className = 'w-12 h-12 rounded-lg';
+          header.appendChild(img);
         }
 
-        document.getElementById('tab-mods')!.addEventListener('click', () => { activeTab = 'mods'; updateTabs(); });
-        document.getElementById('tab-packs')!.addEventListener('click', () => { activeTab = 'packs'; updateTabs(); });
+        const info = document.createElement('div');
+        info.className = 'min-w-0 flex-1';
+        const title = document.createElement('h3');
+        title.className = 'font-semibold text-app-text-primary truncate';
+        title.textContent = project.title;
+        info.appendChild(title);
 
-        function createProjectCard(project: MergedProject): HTMLElement {
-            const card = document.createElement('a');
-            card.href = project.linkUrl;
-            card.target = '_blank';
-            card.rel = 'noopener';
-            card.className = 'group p-4 rounded-xl border border-app-border bg-app-surface hover:bg-app-surface-dark transition-colors';
+        const badges = document.createElement('div');
+        badges.className = 'flex flex-wrap gap-1.5 mt-1';
 
-            const header = document.createElement('div');
-            header.className = 'flex items-center gap-3 mb-3';
-
-            if (project.icon_url) {
-                const img = document.createElement('img');
-                img.src = project.icon_url;
-                img.alt = project.title;
-                img.className = 'w-12 h-12 rounded-lg';
-                header.appendChild(img);
-            }
-
-            const info = document.createElement('div');
-            info.className = 'min-w-0 flex-1';
-            const title = document.createElement('h3');
-            title.className = 'font-semibold text-app-text-primary truncate';
-            title.textContent = project.title;
-            info.appendChild(title);
-
-            const badges = document.createElement('div');
-            badges.className = 'flex flex-wrap gap-1.5 mt-1';
-
-            if (project.cfDownloads > 0) {
-                const cfBadge = document.createElement('span');
-                cfBadge.className = 'px-1.5 py-0.5 text-xs rounded bg-app-surface-dark text-app-text-secondary';
-                cfBadge.textContent = `CF ${formatDownloads(project.cfDownloads)}`;
-                badges.appendChild(cfBadge);
-            }
-
-            if (project.mrDownloads > 0) {
-                const mrBadge = document.createElement('span');
-                mrBadge.className = 'px-1.5 py-0.5 text-xs rounded bg-app-surface-dark text-app-text-secondary';
-                mrBadge.textContent = `MR ${formatDownloads(project.mrDownloads)}`;
-                badges.appendChild(mrBadge);
-            }
-
-            const totalBadge = document.createElement('span');
-            totalBadge.className = 'px-1.5 py-0.5 text-xs rounded bg-app-accent/15 text-app-accent font-medium';
-            totalBadge.textContent = formatDownloads(project.totalDownloads);
-            badges.appendChild(totalBadge);
-
-            info.appendChild(badges);
-            header.appendChild(info);
-
-            const desc = document.createElement('p');
-            desc.className = 'text-sm text-app-text-secondary line-clamp-2';
-            desc.textContent = project.description;
-
-            const loaders = document.createElement('div');
-            loaders.className = 'mt-3 flex flex-wrap gap-1';
-            project.loaders?.forEach((l: string) => {
-                const badge = document.createElement('span');
-                badge.className = 'px-2 py-0.5 text-xs rounded-full bg-app-surface-dark text-app-text-secondary';
-                badge.textContent = l;
-                loaders.appendChild(badge);
-            });
-
-            card.appendChild(header);
-            card.appendChild(desc);
-            if (project.loaders?.length) card.appendChild(loaders);
-            return card;
+        if (project.cfDownloads > 0) {
+          const cfBadge = document.createElement('span');
+          cfBadge.className = 'px-1.5 py-0.5 text-xs rounded bg-app-surface-dark text-app-text-secondary';
+          cfBadge.textContent = `CF ${formatDownloads(project.cfDownloads)}`;
+          badges.appendChild(cfBadge);
         }
 
-        function renderTotalStats(totalMr: number, totalCf: number, lang: 'en' | 'es') {
-            const container = document.getElementById('total-stats')!;
-            container.textContent = '';
-
-            if (totalCf > 0) {
-                const cfBadge = document.createElement('a');
-                cfBadge.href = 'https://www.curseforge.com/members/jahirtrap/projects';
-                cfBadge.target = '_blank';
-                cfBadge.rel = 'noopener';
-                cfBadge.className = 'px-2 py-1 text-xs rounded-lg bg-app-surface-dark text-app-text-secondary hover:text-app-text-primary transition-colors';
-                cfBadge.textContent = `CurseForge: ${formatDownloads(totalCf)}`;
-                container.appendChild(cfBadge);
-            }
-
-            if (totalMr > 0) {
-                const mrBadge = document.createElement('a');
-                mrBadge.href = 'https://modrinth.com/user/jahirtrap';
-                mrBadge.target = '_blank';
-                mrBadge.rel = 'noopener';
-                mrBadge.className = 'px-2 py-1 text-xs rounded-lg bg-app-surface-dark text-app-text-secondary hover:text-app-text-primary transition-colors';
-                mrBadge.textContent = `Modrinth: ${formatDownloads(totalMr)}`;
-                container.appendChild(mrBadge);
-            }
-
-            const totalBadge = document.createElement('span');
-            totalBadge.className = 'px-2 py-1 text-sm rounded-lg bg-app-accent/15 text-app-accent font-semibold';
-            totalBadge.textContent = `${formatDownloads(totalMr + totalCf)} ${t(lang, 'mods.total_downloads').toLowerCase()}`;
-            container.appendChild(totalBadge);
+        if (project.mrDownloads > 0) {
+          const mrBadge = document.createElement('span');
+          mrBadge.className = 'px-1.5 py-0.5 text-xs rounded bg-app-surface-dark text-app-text-secondary';
+          mrBadge.textContent = `MR ${formatDownloads(project.mrDownloads)}`;
+          badges.appendChild(mrBadge);
         }
 
-        async function loadProjects() {
-            const lang = getLang();
-            const loading = document.getElementById('content-loading')!;
+        const totalBadge = document.createElement('span');
+        totalBadge.className = 'px-1.5 py-0.5 text-xs rounded bg-app-accent/15 text-app-accent font-medium';
+        totalBadge.textContent = formatDownloads(project.totalDownloads);
+        badges.appendChild(totalBadge);
 
-            const { projects, totalMr, totalCf } = await fetchMergedProjects('jahirtrap', 'Wall-Jump TXF');
+        info.appendChild(badges);
+        header.appendChild(info);
 
-            if (!projects.length) {
-                loading.textContent = t(lang, 'mods.error');
-                return;
-            }
+        const desc = document.createElement('p');
+        desc.className = 'text-sm text-app-text-secondary line-clamp-2';
+        desc.textContent = project.description;
 
-            renderTotalStats(totalMr, totalCf, lang);
+        const loaders = document.createElement('div');
+        loaders.className = 'mt-3 flex flex-wrap gap-1';
+        project.loaders?.forEach((l: string) => {
+          const badge = document.createElement('span');
+          badge.className = 'px-2 py-0.5 text-xs rounded-full bg-app-surface-dark text-app-text-secondary';
+          badge.textContent = l;
+          loaders.appendChild(badge);
+        });
 
-            window.addEventListener('langchange', (e: Event) => {
-                renderTotalStats(totalMr, totalCf, (e as CustomEvent).detail as 'en' | 'es');
-            });
+        card.appendChild(header);
+        card.appendChild(desc);
+        if (project.loaders?.length) card.appendChild(loaders);
+        return card;
+      }
 
-            const mods = projects.filter((p: MergedProject) => p.project_type === 'mod');
-            const packs = projects.filter((p: MergedProject) => p.project_type === 'resourcepack');
+      function renderTotalStats(totalMr: number, totalCf: number, lang: 'en' | 'es') {
+        const container = document.getElementById('total-stats')!;
+        container.textContent = '';
 
-            const modsGrid = document.getElementById('mods-grid')!;
-            mods.forEach((p: MergedProject) => modsGrid.appendChild(createProjectCard(p)));
-
-            const packsGrid = document.getElementById('packs-grid')!;
-            packs.forEach((p: MergedProject) => packsGrid.appendChild(createProjectCard(p)));
-
-            loading.classList.add('hidden');
-            updateTabs();
+        if (totalCf > 0) {
+          const cfBadge = document.createElement('a');
+          cfBadge.href = 'https://www.curseforge.com/members/jahirtrap/projects';
+          cfBadge.target = '_blank';
+          cfBadge.rel = 'noopener';
+          cfBadge.className = 'px-2 py-1 text-xs rounded-lg bg-app-surface-dark text-app-text-secondary hover:text-app-text-primary transition-colors';
+          cfBadge.textContent = `CurseForge: ${formatDownloads(totalCf)}`;
+          container.appendChild(cfBadge);
         }
 
-        loadProjects();
+        if (totalMr > 0) {
+          const mrBadge = document.createElement('a');
+          mrBadge.href = 'https://modrinth.com/user/jahirtrap';
+          mrBadge.target = '_blank';
+          mrBadge.rel = 'noopener';
+          mrBadge.className = 'px-2 py-1 text-xs rounded-lg bg-app-surface-dark text-app-text-secondary hover:text-app-text-primary transition-colors';
+          mrBadge.textContent = `Modrinth: ${formatDownloads(totalMr)}`;
+          container.appendChild(mrBadge);
+        }
+
+        const totalBadge = document.createElement('span');
+        totalBadge.className = 'px-2 py-1 text-sm rounded-lg bg-app-accent/15 text-app-accent font-semibold';
+        totalBadge.textContent = `${formatDownloads(totalMr + totalCf)} ${t(lang, 'mods.total_downloads').toLowerCase()}`;
+        container.appendChild(totalBadge);
+      }
+
+      async function loadProjects() {
+        const lang = getLang();
+        const loading = document.getElementById('content-loading')!;
+
+        const {projects, totalMr, totalCf} = await fetchMergedProjects('jahirtrap', 'Wall-Jump TXF');
+
+        if (!projects.length) {
+          loading.textContent = t(lang, 'mods.error');
+          return;
+        }
+
+        renderTotalStats(totalMr, totalCf, lang);
+
+        window.addEventListener('langchange', (e: Event) => {
+          renderTotalStats(totalMr, totalCf, (e as CustomEvent).detail as 'en' | 'es');
+        });
+
+        const mods = projects.filter((p: MergedProject) => p.project_type === 'mod');
+        const packs = projects.filter((p: MergedProject) => p.project_type === 'resourcepack');
+
+        const modsGrid = document.getElementById('mods-grid')!;
+        mods.forEach((p: MergedProject) => modsGrid.appendChild(createProjectCard(p)));
+
+        const packsGrid = document.getElementById('packs-grid')!;
+        packs.forEach((p: MergedProject) => packsGrid.appendChild(createProjectCard(p)));
+
+        loading.classList.add('hidden');
+        updateTabs();
+      }
+
+      loadProjects();
     </script>
 </BaseLayout>

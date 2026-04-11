@@ -1,6 +1,25 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import {CubeTransparentIcon, DevicePhoneMobileIcon} from '@heroicons/react/24/outline';
+
+const projects = [
+  {
+    href: '/minecraft-mods',
+    icon: CubeTransparentIcon,
+    titleKey: 'home.minecraft',
+    descKey: 'home.minecraft_desc',
+    linkKey: 'home.view_all',
+    external: false,
+  },
+  {
+    href: 'https://play.google.com/store/apps/developer?id=jahirtrap',
+    icon: DevicePhoneMobileIcon,
+    titleKey: 'home.android',
+    descKey: 'home.android_desc',
+    linkKey: 'home.play_store',
+    external: true,
+  },
+];
 ---
 
 <BaseLayout title="jahirtrap — Developer">
@@ -23,40 +42,23 @@ import {CubeTransparentIcon, DevicePhoneMobileIcon} from '@heroicons/react/24/ou
 
         <!-- Projects -->
         <section>
-            <h2 class="text-xl font-bold text-app-text-primary mb-6" data-i18n="home.projects">Projects</h2>
+            <h2 class="text-xl font-bold text-app-text-primary mb-6" data-i18n="home.projects"></h2>
 
             <div class="grid gap-4 sm:grid-cols-2">
-                <!-- Minecraft Mods -->
-                <a href="/minecraft-mods"
-                   class="group p-6 rounded-xl border border-app-border bg-app-surface hover:bg-app-surface-dark transition-colors">
-                    <div class="flex items-center gap-3 mb-2">
-                        <CubeTransparentIcon className="w-6 h-6 text-app-accent"/>
-                        <h3 class="text-lg font-semibold text-app-text-primary" data-i18n="home.minecraft">Minecraft
-                            Mods</h3>
-                    </div>
-                    <p class="text-sm text-app-text-secondary" data-i18n="home.minecraft_desc">
-                        Multiloader mods for Fabric, Forge, and NeoForge.
-                    </p>
-                    <span class="inline-block mt-3 text-sm text-app-accent group-hover:underline"
-                          data-i18n="home.view_all">View All →</span>
-                </a>
-
-                <!-- Android Apps -->
-                <div class="p-6 rounded-xl border border-app-border bg-app-surface">
-                    <div class="flex items-center gap-3 mb-2">
-                        <DevicePhoneMobileIcon className="w-6 h-6 text-app-accent"/>
-                        <h3 class="text-lg font-semibold text-app-text-primary" data-i18n="home.android">Android
-                            Apps</h3>
-                    </div>
-                    <p class="text-sm text-app-text-secondary" data-i18n="home.android_desc">
-                        Mobile applications published on Google Play.
-                    </p>
-                    <div class="mt-3 flex gap-2">
-                        <a href="https://play.google.com/store/apps/developer?id=jahirtrap" target="_blank"
-                           rel="noopener"
-                           class="text-sm text-app-accent hover:underline" data-i18n="home.play_store">Google Play</a>
-                    </div>
-                </div>
+              {projects.map((p) => (
+                      <a href={p.href}
+                         target={p.external ? '_blank' : undefined}
+                         rel={p.external ? 'noopener' : undefined}
+                         class="group p-6 rounded-xl border border-app-border bg-app-surface hover:bg-app-surface-dark transition-colors">
+                          <div class="flex items-center gap-3 mb-2">
+                              <p.icon className="w-6 h-6 text-app-accent"/>
+                              <h3 class="text-lg font-semibold text-app-text-primary" data-i18n={p.titleKey}></h3>
+                          </div>
+                          <p class="text-sm text-app-text-secondary" data-i18n={p.descKey}></p>
+                          <span class="inline-block mt-3 text-sm text-app-accent group-hover:underline"
+                                data-i18n={p.linkKey}></span>
+                      </a>
+              ))}
             </div>
         </section>
     </div>

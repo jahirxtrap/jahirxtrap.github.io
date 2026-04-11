@@ -85,7 +85,7 @@ export async function fetchCurseForgeByAuthor(knownProjectName: string): Promise
   try {
     // Find author ID from a known project
     const searchRes = await fetch(`${CURSEFORGE_BASE}/mods/search?gameId=432&searchFilter=${encodeURIComponent(knownProjectName)}&pageSize=1`, {
-      headers: { 'x-api-key': CURSEFORGE_KEY },
+      headers: {'x-api-key': CURSEFORGE_KEY},
     });
     if (!searchRes.ok) return [];
     const searchData = await searchRes.json();
@@ -94,7 +94,7 @@ export async function fetchCurseForgeByAuthor(knownProjectName: string): Promise
 
     // Fetch all projects by author
     const res = await fetch(`${CURSEFORGE_BASE}/mods/search?gameId=432&authorId=${authorId}&pageSize=50&sortField=2&sortOrder=desc`, {
-      headers: { 'x-api-key': CURSEFORGE_KEY },
+      headers: {'x-api-key': CURSEFORGE_KEY},
     });
     if (!res.ok) return [];
     const data = await res.json();
@@ -113,7 +113,11 @@ function cfClassToType(classId: number): 'mod' | 'resourcepack' {
   return classId === 6 ? 'mod' : 'resourcepack';
 }
 
-export async function fetchMergedProjects(modrinthUser: string, cfKnownProject: string): Promise<{ projects: MergedProject[]; totalMr: number; totalCf: number }> {
+export async function fetchMergedProjects(modrinthUser: string, cfKnownProject: string): Promise<{
+  projects: MergedProject[];
+  totalMr: number;
+  totalCf: number
+}> {
   const [mrProjects, cfProjects] = await Promise.all([
     fetchModrinthProjects(modrinthUser),
     fetchCurseForgeByAuthor(cfKnownProject),
@@ -169,7 +173,7 @@ export async function fetchMergedProjects(modrinthUser: string, cfKnownProject: 
   // Sort by total downloads
   merged.sort((a, b) => b.totalDownloads - a.totalDownloads);
 
-  return { projects: merged, totalMr, totalCf };
+  return {projects: merged, totalMr, totalCf};
 }
 
 export function formatDownloads(n: number): string {
