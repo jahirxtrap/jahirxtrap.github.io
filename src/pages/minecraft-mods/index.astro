@@ -1,0 +1,104 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Minecraft Mods — jahirtrap">
+    <div class="space-y-8">
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-app-text-primary" data-i18n="mods.title">Minecraft Mods</h1>
+            <p class="text-app-text-secondary mt-2" data-i18n="mods.subtitle">Multiloader mods for Fabric, Forge, and
+                NeoForge</p>
+            <p class="text-app-accent font-semibold mt-2" id="total-downloads"></p>
+        </div>
+
+        <div id="mods-loading" class="text-center text-app-text-secondary py-12" data-i18n="mods.loading">
+            Loading mods...
+        </div>
+
+        <div id="mods-grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 hidden">
+        </div>
+    </div>
+
+    <script>
+      import {fetchModrinthProjects, formatDownloads, type ModrinthProject} from '@/utils/api';
+      import {getLang, t} from '@/utils/i18n';
+
+      function createModCard(mod: ModrinthProject, lang: 'en' | 'es'): HTMLElement {
+        const link = document.createElement('a');
+        link.href = `/minecraft-mods/${mod.slug}`;
+        link.className = 'group p-4 rounded-xl border border-app-border bg-app-surface hover:bg-app-surface-dark transition-colors';
+
+        const header = document.createElement('div');
+        header.className = 'flex items-center gap-3 mb-3';
+
+        if (mod.icon_url) {
+          const img = document.createElement('img');
+          img.src = mod.icon_url;
+          img.alt = mod.title;
+          img.className = 'w-12 h-12 rounded-lg';
+          header.appendChild(img);
+        } else {
+          const placeholder = document.createElement('div');
+          placeholder.className = 'w-12 h-12 rounded-lg bg-app-surface-dark flex items-center justify-center text-app-text-secondary text-lg';
+          placeholder.textContent = '📦';
+          header.appendChild(placeholder);
+        }
+
+        const info = document.createElement('div');
+        info.className = 'min-w-0';
+        const title = document.createElement('h3');
+        title.className = 'font-semibold text-app-text-primary truncate';
+        title.textContent = mod.title;
+        const downloads = document.createElement('p');
+        downloads.className = 'text-xs text-app-text-secondary';
+        downloads.textContent = `${formatDownloads(mod.downloads)} ${t(lang, 'mods.downloads')}`;
+        info.appendChild(title);
+        info.appendChild(downloads);
+        header.appendChild(info);
+
+        const desc = document.createElement('p');
+        desc.className = 'text-sm text-app-text-secondary line-clamp-2';
+        desc.textContent = mod.description;
+
+        const loaders = document.createElement('div');
+        loaders.className = 'mt-3 flex flex-wrap gap-1';
+        mod.loaders?.forEach((l: string) => {
+          const badge = document.createElement('span');
+          badge.className = 'px-2 py-0.5 text-xs rounded-full bg-app-surface-dark text-app-text-secondary';
+          badge.textContent = l;
+          loaders.appendChild(badge);
+        });
+
+        link.appendChild(header);
+        link.appendChild(desc);
+        link.appendChild(loaders);
+        return link;
+      }
+
+      async function loadMods() {
+        const lang = getLang();
+        const projects = await fetchModrinthProjects('jahirxtrap');
+        const loading = document.getElementById('mods-loading')!;
+        const grid = document.getElementById('mods-grid')!;
+        const totalEl = document.getElementById('total-downloads')!;
+
+        if (!projects.length) {
+          loading.textContent = t(lang, 'mods.error');
+          return;
+        }
+
+        const sorted = projects.sort((a: ModrinthProject, b: ModrinthProject) => b.downloads - a.downloads);
+        const totalDownloads = sorted.reduce((sum: number, p: ModrinthProject) => sum + p.downloads, 0);
+        totalEl.textContent = `${formatDownloads(totalDownloads)} ${t(lang, 'mods.total_downloads').toLowerCase()}`;
+
+        sorted.forEach((mod: ModrinthProject) => {
+          grid.appendChild(createModCard(mod, lang));
+        });
+
+        loading.classList.add('hidden');
+        grid.classList.remove('hidden');
+      }
+
+      loadMods();
+    </script>
+</BaseLayout>

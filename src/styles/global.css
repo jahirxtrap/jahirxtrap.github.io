@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme {
+    --color-app-background: var(--app-color-background);
+    --color-app-surface: var(--app-color-surface);
+    --color-app-surface-dark: var(--app-color-surface-dark);
+    --color-app-primary: var(--app-color-primary);
+    --color-app-primary-dark: var(--app-color-primary-dark);
+    --color-app-secondary: var(--app-color-secondary);
+    --color-app-accent: var(--app-color-accent);
+    --color-app-danger: var(--app-color-danger);
+    --color-app-text-primary: var(--app-color-text-primary);
+    --color-app-text-secondary: var(--app-color-text-secondary);
+    --color-app-text-inverse: var(--app-color-text-inverse);
+    --color-app-border: var(--app-color-border);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--app-color-border);
+    border-radius: 4px;
+}
+
+body {
+    background-color: var(--app-color-background);
+    color: var(--app-color-text-primary);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    transition: background-color 0.2s, color 0.2s;
+}

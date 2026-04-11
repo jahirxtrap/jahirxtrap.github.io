@@ -1,0 +1,79 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import {CubeTransparentIcon, DevicePhoneMobileIcon} from '@heroicons/react/24/outline';
+---
+
+<BaseLayout title="jahirtrap — Developer">
+    <div class="space-y-12">
+        <!-- Profile -->
+        <section class="flex flex-col items-center text-center gap-4 pt-8">
+            <img id="avatar" src="https://github.com/jahirxtrap.png" alt="jahirtrap"
+                 class="w-28 h-28 rounded-full ring-2 ring-app-border"/>
+            <div>
+                <h1 class="text-3xl font-bold text-app-text-primary" id="profile-name">jahirtrap</h1>
+                <p class="text-app-text-secondary mt-1" id="profile-bio">...</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="https://github.com/jahirxtrap" target="_blank" rel="noopener"
+                   class="px-4 py-2 text-sm rounded-lg bg-app-surface border border-app-border text-app-text-primary hover:bg-app-surface-dark transition-colors">
+                    GitHub
+                </a>
+            </div>
+        </section>
+
+        <!-- Projects -->
+        <section>
+            <h2 class="text-xl font-bold text-app-text-primary mb-6" data-i18n="home.projects">Projects</h2>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                <!-- Minecraft Mods -->
+                <a href="/minecraft-mods"
+                   class="group p-6 rounded-xl border border-app-border bg-app-surface hover:bg-app-surface-dark transition-colors">
+                    <div class="flex items-center gap-3 mb-2">
+                        <CubeTransparentIcon className="w-6 h-6 text-app-accent"/>
+                        <h3 class="text-lg font-semibold text-app-text-primary" data-i18n="home.minecraft">Minecraft
+                            Mods</h3>
+                    </div>
+                    <p class="text-sm text-app-text-secondary" data-i18n="home.minecraft_desc">
+                        Multiloader mods for Fabric, Forge, and NeoForge.
+                    </p>
+                    <span class="inline-block mt-3 text-sm text-app-accent group-hover:underline"
+                          data-i18n="home.view_all">View All →</span>
+                </a>
+
+                <!-- Android Apps -->
+                <div class="p-6 rounded-xl border border-app-border bg-app-surface">
+                    <div class="flex items-center gap-3 mb-2">
+                        <DevicePhoneMobileIcon className="w-6 h-6 text-app-accent"/>
+                        <h3 class="text-lg font-semibold text-app-text-primary" data-i18n="home.android">Android
+                            Apps</h3>
+                    </div>
+                    <p class="text-sm text-app-text-secondary" data-i18n="home.android_desc">
+                        Mobile applications published on Google Play.
+                    </p>
+                    <div class="mt-3 flex gap-2">
+                        <a href="https://play.google.com/store/apps/developer?id=jahirtrap" target="_blank"
+                           rel="noopener"
+                           class="text-sm text-app-accent hover:underline" data-i18n="home.play_store">Google Play</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+      import {fetchGitHubUser} from '@/utils/api';
+
+      async function loadProfile() {
+        const user = await fetchGitHubUser('jahirxtrap');
+        if (user) {
+          const nameEl = document.getElementById('profile-name');
+          const bioEl = document.getElementById('profile-bio');
+          if (nameEl && user.name) nameEl.textContent = user.name;
+          if (bioEl && user.bio) bioEl.textContent = user.bio;
+        }
+      }
+
+      loadProfile();
+    </script>
+</BaseLayout>

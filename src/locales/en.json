@@ -1,0 +1,47 @@
+{
+  "nav": {
+    "home": "Home",
+    "mods": "Minecraft Mods",
+    "source": "Source"
+  },
+  "home": {
+    "role": "Independent Developer",
+    "projects": "Projects",
+    "minecraft": "Minecraft Mods",
+    "minecraft_desc": "Multiloader mods for Fabric, Forge, and NeoForge.",
+    "android": "Android Apps",
+    "android_desc": "Mobile applications published on Google Play.",
+    "view_all": "View All",
+    "play_store": "Google Play"
+  },
+  "mods": {
+    "title": "Minecraft Mods",
+    "subtitle": "Multiloader mods for Fabric, Forge, and NeoForge",
+    "downloads": "downloads",
+    "versions": "Versions",
+    "loaders": "Loaders",
+    "description": "Description",
+    "links": "Links",
+    "source_code": "Source Code",
+    "issues": "Issues",
+    "gallery": "Gallery",
+    "documentation": "Documentation",
+    "no_mods": "No mods found.",
+    "loading": "Loading mods...",
+    "error": "Failed to load mods.",
+    "curseforge": "CurseForge",
+    "modrinth": "Modrinth",
+    "total_downloads": "Total Downloads"
+  },
+  "footer": {
+    "made_by": "Made by"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "lang": {
+    "en": "English",
+    "es": "Spanish"
+  }
+}

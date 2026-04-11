@@ -1,0 +1,44 @@
+---
+import {SunIcon, MoonIcon} from '@heroicons/react/24/outline';
+import {LanguageIcon} from '@heroicons/react/24/outline';
+---
+
+<nav class="sticky top-0 z-50 backdrop-blur-md bg-app-background/80 border-b border-app-border">
+    <div class="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+        <a href="/" class="font-bold text-lg text-app-text-primary hover:text-app-accent transition-colors">
+            jahirtrap
+        </a>
+
+        <div class="flex items-center gap-2">
+            <button id="theme-toggle"
+                    class="p-2 rounded-lg hover:bg-app-surface transition-colors text-app-text-secondary hover:text-app-text-primary cursor-pointer"
+                    aria-label="Toggle theme">
+                <span id="icon-sun" class="hidden"><SunIcon className="w-5 h-5"/></span>
+                <span id="icon-moon" class="hidden"><MoonIcon className="w-5 h-5"/></span>
+            </button>
+
+            <button id="lang-toggle"
+                    class="p-2 rounded-lg hover:bg-app-surface transition-colors text-sm font-medium text-app-text-secondary hover:text-app-text-primary cursor-pointer">
+                EN
+            </button>
+        </div>
+    </div>
+</nav>
+
+<script>
+  import {toggleTheme} from '@/utils/theme';
+  import {getLang, setLang, type Lang} from '@/utils/i18n';
+
+  document.getElementById('theme-toggle')!.addEventListener('click', () => {
+    toggleTheme();
+    const isDark = document.documentElement.classList.contains('dark');
+    document.getElementById('icon-sun')!.classList.toggle('hidden', !isDark);
+    document.getElementById('icon-moon')!.classList.toggle('hidden', isDark);
+  });
+
+  document.getElementById('lang-toggle')!.addEventListener('click', () => {
+    const next: Lang = getLang() === 'en' ? 'es' : 'en';
+    setLang(next);
+    document.getElementById('lang-toggle')!.textContent = next.toUpperCase();
+  });
+</script>

@@ -1,0 +1,103 @@
+---
+import '@/styles/global.css';
+import Navbar from '@/components/Navbar.astro';
+import Footer from '@/components/Footer.astro';
+import {lightTheme, darkTheme} from '@/utils/themes';
+import enLocale from '@/locales/en.json';
+import esLocale from '@/locales/es.json';
+
+interface Props {
+  title?: string;
+}
+
+const {title = 'jahirtrap'} = Astro.props;
+
+const lightColors = JSON.stringify(lightTheme.colors);
+const darkColors = JSON.stringify(darkTheme.colors);
+const enJson = JSON.stringify(enLocale);
+const esJson = JSON.stringify(esLocale);
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="generator" content={Astro.generator}/>
+    <title>{title}</title>
+    <link rel="icon" href="https://github.com/jahirxtrap.png"/>
+    <script is:inline define:vars={{lightColors, darkColors}}>
+      (function () {
+        var r = document.documentElement;
+        var saved = localStorage.getItem('theme');
+        var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (dark) r.classList.add('dark');
+        r.style.colorScheme = dark ? 'dark' : 'light';
+        var c = dark ? JSON.parse(darkColors) : JSON.parse(lightColors);
+        var map = {
+          primary: 'primary',
+          primaryDark: 'primary-dark',
+          secondary: 'secondary',
+          accent: 'accent',
+          danger: 'danger',
+          background: 'background',
+          surface: 'surface',
+          surfaceDark: 'surface-dark',
+          textPrimary: 'text-primary',
+          textSecondary: 'text-secondary',
+          textInverse: 'text-inverse',
+          border: 'border'
+        };
+        for (var k in map) r.style.setProperty('--app-color-' + map[k], c[k]);
+        r.style.scrollbarColor = c.border + ' transparent';
+      })();
+    </script>
+</head>
+<body class="min-h-screen flex flex-col">
+<Navbar/>
+<main class="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
+    <slot/>
+</main>
+<Footer/>
+
+<script is:inline define:vars={{enJson, esJson}}>
+  (function () {
+    var lang = localStorage.getItem('lang') || 'en';
+    document.documentElement.lang = lang;
+    var locales = {en: JSON.parse(enJson), es: JSON.parse(esJson)};
+
+    function getVal(obj, path) {
+      var keys = path.split('.'), cur = obj;
+      for (var i = 0; i < keys.length; i++) {
+        if (cur && typeof cur === 'object' && keys[i] in cur) cur = cur[keys[i]];
+        else return path;
+      }
+      return typeof cur === 'string' ? cur : path;
+    }
+
+    var els = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < els.length; i++) {
+      var key = els[i].getAttribute('data-i18n');
+      if (key) els[i].textContent = getVal(locales[lang], key);
+    }
+    // Sync lang button
+    var langBtn = document.getElementById('lang-toggle');
+    if (langBtn) langBtn.textContent = lang.toUpperCase();
+    // Sync theme icons
+    var isDark = document.documentElement.classList.contains('dark');
+    var sun = document.getElementById('icon-sun');
+    var moon = document.getElementById('icon-moon');
+    if (sun) sun.classList.toggle('hidden', !isDark);
+    if (moon) moon.classList.toggle('hidden', isDark);
+  })();
+</script>
+
+<script>
+  import {getTheme, applyTheme} from '@/utils/theme';
+  import {getLang, applyTranslations} from '@/utils/i18n';
+
+  applyTheme(getTheme());
+  applyTranslations();
+</script>
+</body>
+</html>
