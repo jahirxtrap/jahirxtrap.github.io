@@ -7,7 +7,7 @@ Personal portfolio and Minecraft mods showcase for **jahirtrap**.
 - **Astro 6** — Static site framework
 - **React 19** — Interactive components (islands)
 - **Tailwind CSS 4** — Styling via `app-*` custom classes
-- **Heroicons** — `@heroicons/react` rendered at build time as static SVGs
+- **Lucide Icons** — `lucide-astro` for Astro templates, `lucide` for client-side JS via `createIcon()` in `src/utils/icons.ts`
 - **TypeScript** — Strict mode
 
 ## Development Commands
@@ -100,24 +100,41 @@ GitHub Pages via GitHub Actions (`.github/workflows/deploy.yml`). Triggered on p
 
 ## Icons
 
-Use `@heroicons/react` for all icons. Import in `.astro` files — Astro renders them as static SVGs at build time (no React runtime sent to client).
+Two ways to use Lucide icons depending on context:
 
+**In Astro templates** (build time):
 ```astro
 ---
-import { SunIcon } from '@heroicons/react/24/outline';
+import { Sun } from 'lucide-astro';
 ---
-<SunIcon className="w-5 h-5" />
+<Sun class="w-5 h-5" />
 ```
 
-- Use `24/outline` for UI icons
-- Use `24/solid` for filled variants
-- Never use inline SVGs or emojis — always Heroicons
+**In client-side JS** (runtime) via `src/utils/icons.ts`:
+```ts
+import { createIcon } from '@/utils/icons';
+const icon = createIcon('download', 'w-3 h-3');
+element.appendChild(icon);
+```
+
+- Use `class` for sizing (Tailwind), not `size` prop
+- Never use inline SVGs, emoji, or hardcoded SVG paths
+- For dynamic badges, use `createBadge()` from `src/utils/badge.ts` which supports icons
+
+## Badge Component
+
+Two versions of the same component for different contexts:
+
+- **`Badge.astro`** — For Astro templates (build time). Static badges that don't depend on API data. Supports `text`, `href`, `accent`, `i18n` props and a slot for icons.
+- **`createBadge()`** in `src/utils/badge.ts` — For client-side JS (runtime). Dynamic badges created after API responses. Supports `text`, `href`, `accent`, `icon` options.
+
+Both produce identical HTML with the same CSS classes. Use `Badge.astro` when possible, `createBadge()` only when data comes from APIs at runtime.
 
 ## Key Rules
 
 1. **No hardcoded colors** — Use `app-*` Tailwind classes, colors defined only in `themes.ts`
 2. **No hardcoded texts** — Use locale files (`en.json`, `es.json`)
-3. **No inline SVGs or emojis** — Use `@heroicons/react`
+3. **No inline SVGs or emojis** — Use `lucide-astro` in templates, `createIcon()` in JS
 4. **Prefer Tailwind over inline styles**
 5. **Client-side fetch** — All API data loaded in browser for real-time values
 6. **Dark theme default** — Follows system preference, user can toggle

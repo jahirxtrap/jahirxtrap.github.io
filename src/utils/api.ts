@@ -176,6 +176,60 @@ export async function fetchMergedProjects(modrinthUser: string, cfKnownProject: 
   return {projects: merged, totalMr, totalCf};
 }
 
+export interface GitHubRepo {
+  name: string;
+  full_name: string;
+  description: string;
+  html_url: string;
+  stargazers_count: number;
+  topics: string[];
+}
+
+export async function fetchGitHubRepo(owner: string, repo: string): Promise<GitHubRepo | null> {
+  try {
+    const res = await fetch(`${GITHUB_BASE}/repos/${owner}/${repo}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchGitHubRawFile(owner: string, repo: string, branch: string, path: string): Promise<string | null> {
+  try {
+    const res = await fetch(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`);
+    if (!res.ok) return null;
+    return await res.text();
+  } catch {
+    return null;
+  }
+}
+
+export interface MavenInfo {
+  totalVersions: number;
+  latestVersion: string;
+  license: string;
+  description: string;
+}
+
+export async function fetchMavenInfo(namespace: string, name: string): Promise<MavenInfo | null> {
+  try {
+    const res = await fetch(`https://central.sonatype.com/api/internal/browse/component/versions?sortField=normalizedVersion&sortDirection=desc&page=0&size=1&filter=namespace:${namespace},name:${name}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const first = data.components?.[0];
+    if (!first) return null;
+    return {
+      totalVersions: data.totalResultCount || 0,
+      latestVersion: first.version || '',
+      license: first.licenses?.[0] || '',
+      description: first.description || '',
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function formatDownloads(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
   if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';

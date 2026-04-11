@@ -12,7 +12,9 @@
     "android": "Android Apps",
     "android_desc": "Mobile applications published on Google Play.",
     "view_all": "View All",
-    "play_store": "Google Play"
+    "play_store": "Google Play",
+    "libraries": "Maven Libraries",
+    "libraries_desc": "Open source libraries published on Maven Central."
   },
   "mods": {
     "title": "Minecraft Mods",
@@ -34,6 +36,19 @@
     "total_downloads": "Total Downloads",
     "mods_title": "Mods",
     "packs_title": "Resource Packs"
+  },
+  "libraries": {
+    "title": "Maven Libraries",
+    "subtitle": "Open source libraries published on Maven Central",
+    "maven_central": "Maven Central",
+    "documentation": "Documentation",
+    "source_code": "Source Code",
+    "loading": "Loading...",
+    "error": "Failed to load libraries.",
+    "latest": "Latest",
+    "versions": "versions",
+    "license": "License",
+    "profile": "Maven Profile"
   },
   "footer": {
     "made_by": "Made by"

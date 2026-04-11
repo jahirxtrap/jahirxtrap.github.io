@@ -1,5 +1,5 @@
 ---
-import {SunIcon, MoonIcon} from '@heroicons/react/24/outline';
+import {Sun, Moon} from 'lucide-astro';
 ---
 
 <nav class="sticky top-0 z-50 backdrop-blur-md bg-app-background/80 border-b border-app-border">
@@ -12,8 +12,8 @@ import {SunIcon, MoonIcon} from '@heroicons/react/24/outline';
             <button id="theme-toggle"
                     class="p-2 rounded-lg hover:bg-app-surface transition-colors text-app-text-secondary hover:text-app-text-primary cursor-pointer"
                     aria-label="Toggle theme">
-                <span id="icon-sun" class="hidden"><SunIcon className="w-5 h-5"/></span>
-                <span id="icon-moon" class="hidden"><MoonIcon className="w-5 h-5"/></span>
+                <span id="icon-sun" class="hidden"><Sun class="w-5 h-5"/></span>
+                <span id="icon-moon" class="hidden"><Moon class="w-5 h-5"/></span>
             </button>
 
             <button id="lang-toggle"
