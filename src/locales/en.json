@@ -31,7 +31,9 @@
     "error": "Failed to load mods.",
     "curseforge": "CurseForge",
     "modrinth": "Modrinth",
-    "total_downloads": "Total Downloads"
+    "total_downloads": "Total Downloads",
+    "mods_title": "Mods",
+    "packs_title": "Resource Packs"
   },
   "footer": {
     "made_by": "Made by"

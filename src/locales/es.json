@@ -31,7 +31,9 @@
     "error": "Error al cargar mods.",
     "curseforge": "CurseForge",
     "modrinth": "Modrinth",
-    "total_downloads": "Descargas Totales"
+    "total_downloads": "Descargas Totales",
+    "mods_title": "Mods",
+    "packs_title": "Paquetes de Recursos"
   },
   "footer": {
     "made_by": "Hecho por"
