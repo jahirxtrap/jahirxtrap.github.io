@@ -46,3 +46,10 @@ export function applyTranslations(lang?: Lang) {
     if (key) el.textContent = t(currentLang, key);
   });
 }
+
+export function onLangChange(callback: (lang: Lang) => void) {
+  callback(getLang());
+  window.addEventListener('langchange', (e: Event) => {
+    callback((e as CustomEvent).detail as Lang);
+  });
+}

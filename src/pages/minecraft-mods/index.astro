@@ -26,8 +26,9 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 
     <script>
       import {fetchMergedProjects, formatDownloads, type MergedProject} from '@/utils/api';
-      import {getLang, t} from '@/utils/i18n';
+      import {getLang, t, onLangChange} from '@/utils/i18n';
       import {createBadge} from '@/utils/badge';
+      import {createIcon} from '@/utils/icons';
 
       let activeTab = 'mods';
 
@@ -69,11 +70,20 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
         const header = document.createElement('div');
         header.className = 'flex items-center gap-3 mb-3';
 
+        const placeholder = document.createElement('div');
+        placeholder.className = 'w-12 h-12 rounded-lg bg-app-surface-dark flex items-center justify-center flex-shrink-0';
+        placeholder.appendChild(createIcon('ImageOff', 'w-5 h-5'));
+        header.appendChild(placeholder);
+
         if (project.icon_url) {
           const img = document.createElement('img');
           img.src = project.icon_url;
           img.alt = project.title;
-          img.className = 'w-12 h-12 rounded-lg';
+          img.className = 'w-12 h-12 rounded-lg hidden flex-shrink-0';
+          img.onload = () => {
+            img.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+          };
           header.appendChild(img);
         }
 
@@ -146,11 +156,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
           return;
         }
 
-        renderTotalStats(totalMr, totalCf, lang);
-
-        window.addEventListener('langchange', (e: Event) => {
-          renderTotalStats(totalMr, totalCf, (e as CustomEvent).detail as 'en' | 'es');
-        });
+        onLangChange(l => renderTotalStats(totalMr, totalCf, l));
 
         const mods = projects.filter((p: MergedProject) => p.project_type === 'mod');
         const packs = projects.filter((p: MergedProject) => p.project_type === 'resourcepack');

@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import {Blocks, Smartphone, Code2, ExternalLink} from 'lucide-astro';
+import {Blocks, Smartphone, Code2, ExternalLink, ImageOff} from 'lucide-astro';
 import Badge from '@/components/Badge.astro';
 ---
 
@@ -8,8 +8,13 @@ import Badge from '@/components/Badge.astro';
     <div class="space-y-12">
         <!-- Profile -->
         <section class="flex flex-col items-center text-center gap-4 pt-8">
+            <div id="avatar-placeholder"
+                 class="w-28 h-28 rounded-full ring-2 ring-app-border bg-app-surface-dark flex items-center justify-center">
+                <ImageOff class="w-8 h-8 text-app-text-secondary"/>
+            </div>
             <img id="avatar" src="https://github.com/jahirxtrap.png" alt="jahirtrap"
-                 class="w-28 h-28 rounded-full ring-2 ring-app-border"/>
+                 class="w-28 h-28 rounded-full ring-2 ring-app-border hidden"
+                 onload="this.classList.remove('hidden');document.getElementById('avatar-placeholder').classList.add('hidden')"/>
             <div>
                 <h1 class="text-3xl font-bold text-app-text-primary" id="profile-name">jahirtrap</h1>
                 <p class="text-app-text-secondary mt-1" id="profile-bio">...</p>

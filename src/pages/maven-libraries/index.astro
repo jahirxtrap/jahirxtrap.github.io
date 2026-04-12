@@ -118,7 +118,7 @@ function formatPageName(page: string): string {
 
     <script>
       import {fetchGitHubRepo, fetchGitHubRawFile, fetchMavenInfo} from '@/utils/api';
-      import {getLang, t} from '@/utils/i18n';
+      import {getLang, t, onLangChange} from '@/utils/i18n';
       import {renderMarkdown, addCopyButtons, markdownStyles} from '@/utils/markdown';
       import {createBadge} from '@/utils/badge';
 
@@ -150,12 +150,15 @@ function formatPageName(page: string): string {
         // Maven stats
         fetchMavenInfo(lib.mavenGroup, lib.mavenArtifact).then(info => {
           if (!info) return;
+
           const container = document.querySelector(`[data-maven-stats="${lib.id}"]`);
           if (!container) return;
-
-          container.appendChild(createBadge(`${t(lang, 'libraries.latest')}: ${info.latestVersion}`, {accent: true}));
-          container.appendChild(createBadge(`${info.totalVersions} ${t(lang, 'libraries.versions')}`));
-          container.appendChild(createBadge(`${t(lang, 'libraries.license')}: ${info.license}`));
+          onLangChange(l => {
+            container.textContent = '';
+            container.appendChild(createBadge(`${t(l, 'libraries.latest')}: ${info.latestVersion}`, {accent: true}));
+            container.appendChild(createBadge(`${info.totalVersions} ${t(l, 'libraries.versions')}`));
+            container.appendChild(createBadge(`${t(l, 'libraries.license')}: ${info.license}`));
+          });
         });
 
         // Wiki pages
