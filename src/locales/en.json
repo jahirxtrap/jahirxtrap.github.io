@@ -14,7 +14,12 @@
     "view_all": "View All",
     "play_store": "Google Play",
     "libraries": "Maven Libraries",
-    "libraries_desc": "Open source libraries published on Maven Central."
+    "libraries_desc": "Open source libraries published on Maven Central.",
+    "sudial_desc": "SaaS platform that centralizes business communication through WhatsApp with chatbot automation.",
+    "otp_desc": "Portal for accessing OTP codes for Disney accounts.",
+    "website": "Website",
+    "app_store": "App Store",
+    "private": "Private"
   },
   "mods": {
     "title": "Minecraft Mods",
