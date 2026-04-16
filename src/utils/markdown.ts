@@ -7,6 +7,10 @@ export async function renderMarkdown(md: string): Promise<string> {
   return DOMPurify.sanitize(html);
 }
 
+export function sanitizeHtml(html: string): string {
+  return DOMPurify.sanitize(html);
+}
+
 export function addCopyButtons(container: Element): void {
   container.querySelectorAll('pre').forEach(pre => {
     const btn = document.createElement('button');
@@ -55,4 +59,5 @@ export const markdownStyles = [
   '[&_li]:ml-4 [&_ul]:list-disc [&_ol]:list-decimal',
   '[&_hr]:border-app-border [&_hr]:my-4',
   '[&_blockquote]:border-l-2 [&_blockquote]:border-app-border [&_blockquote]:pl-4 [&_blockquote]:text-app-text-secondary',
+  '[&_img]:inline-block [&_img]:align-middle',
 ].join(' ');

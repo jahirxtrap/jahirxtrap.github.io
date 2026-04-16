@@ -26,16 +26,23 @@
     "links": "Links",
     "source_code": "Source Code",
     "issues": "Issues",
+    "wiki": "Wiki",
     "gallery": "Gallery",
     "documentation": "Documentation",
     "no_mods": "No mods found.",
-    "loading": "Loading mods...",
+    "loading": "Loading...",
     "error": "Failed to load mods.",
     "curseforge": "CurseForge",
     "modrinth": "Modrinth",
     "total_downloads": "Total Downloads",
     "mods_title": "Mods",
-    "packs_title": "Resource Packs"
+    "packs_title": "Resource Packs",
+    "back_to_mods": "Back to Mods",
+    "back_to_packs": "Back to Resource Packs",
+    "not_found": "Mod not found.",
+    "screenshots": "Screenshots",
+    "description_unavailable": "No description available for this mod.",
+    "categories": "Categories"
   },
   "libraries": {
     "title": "Maven Libraries",
@@ -49,6 +56,11 @@
     "versions": "versions",
     "license": "License",
     "profile": "Maven Profile"
+  },
+  "error": {
+    "not_found_title": "Page not found",
+    "not_found_subtitle": "The page you're looking for doesn't exist or has been moved.",
+    "back_home": "Back to Home"
   },
   "footer": {
     "made_by": "Made by"

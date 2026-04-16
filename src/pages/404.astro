@@ -1,0 +1,14 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="jahirtrap — 404">
+    <div class="flex flex-col items-center justify-center text-center min-h-[70vh] space-y-6">
+        <h1 class="text-[9rem] sm:text-[11rem] font-black text-app-accent leading-none tracking-tight">404</h1>
+        <h2 class="text-2xl font-semibold text-app-text-primary" data-i18n="error.not_found_title"></h2>
+        <p class="text-sm text-app-text-secondary max-w-md" data-i18n="error.not_found_subtitle"></p>
+        <a href="/"
+           class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium rounded-lg bg-app-accent text-app-text-inverse hover:opacity-90 transition-opacity"
+           data-i18n="error.back_home"></a>
+    </div>
+</BaseLayout>

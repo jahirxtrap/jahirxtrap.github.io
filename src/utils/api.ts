@@ -29,17 +29,28 @@ export interface ModrinthProject {
   body: string;
 }
 
+export interface CurseForgeScreenshot {
+  id: number;
+  title: string;
+  description: string;
+  thumbnailUrl: string;
+  url: string;
+}
+
 export interface CurseForgeProject {
   id: number;
+  slug: string;
   name: string;
   summary: string;
   downloadCount: number;
   classId: number;
   logo: { url: string } | null;
+  screenshots: CurseForgeScreenshot[];
   links: {
     websiteUrl: string;
     sourceUrl: string;
     issuesUrl: string;
+    wikiUrl: string;
   };
   authors: { id: number; name: string }[];
   categories: { id: number; name: string; classId: number }[];
@@ -58,6 +69,10 @@ export interface MergedProject {
   mrUrl: string | null;
   cfUrl: string | null;
   linkUrl: string; // primary link (MR first, CF fallback)
+  slug: string; // routing slug (MR slug if available, else CF slug)
+  source: 'mr' | 'cf'; // primary source for the detail page
+  mrSlug: string | null;
+  cfId: number | null;
 }
 
 export async function fetchGitHubUser(username: string): Promise<GitHubUser | null> {
@@ -77,6 +92,16 @@ export async function fetchModrinthProjects(userId: string): Promise<ModrinthPro
     return await res.json();
   } catch {
     return [];
+  }
+}
+
+export async function fetchModrinthProject(slug: string): Promise<ModrinthProject | null> {
+  try {
+    const res = await fetch(`${MODRINTH_BASE}/project/${slug}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
   }
 }
 
@@ -101,6 +126,50 @@ export async function fetchCurseForgeByAuthor(knownProjectName: string): Promise
     return data.data || [];
   } catch {
     return [];
+  }
+}
+
+export async function findCurseForgeByTitle(title: string): Promise<CurseForgeProject | null> {
+  if (!CURSEFORGE_KEY) return null;
+  try {
+    const res = await fetch(`${CURSEFORGE_BASE}/mods/search?gameId=432&searchFilter=${encodeURIComponent(title)}&pageSize=10`, {
+      headers: {'x-api-key': CURSEFORGE_KEY},
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const list: CurseForgeProject[] = data.data || [];
+    const target = normalizeName(title);
+    return list.find(m => normalizeName(m.name) === target) || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchCurseForgeDescription(modId: number): Promise<string | null> {
+  if (!CURSEFORGE_KEY) return null;
+  try {
+    const res = await fetch(`${CURSEFORGE_BASE}/mods/${modId}/description`, {
+      headers: {'x-api-key': CURSEFORGE_KEY},
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.data || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchCurseForgeMod(modId: number): Promise<CurseForgeProject | null> {
+  if (!CURSEFORGE_KEY) return null;
+  try {
+    const res = await fetch(`${CURSEFORGE_BASE}/mods/${modId}`, {
+      headers: {'x-api-key': CURSEFORGE_KEY},
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.data || null;
+  } catch {
+    return null;
   }
 }
 
@@ -145,6 +214,10 @@ export async function fetchMergedProjects(modrinthUser: string, cfKnownProject: 
       mrUrl: `https://modrinth.com/${mr.project_type === 'resourcepack' ? 'resourcepack' : 'mod'}/${mr.slug}`,
       cfUrl: cf?.links.websiteUrl || null,
       linkUrl: `https://modrinth.com/${mr.project_type === 'resourcepack' ? 'resourcepack' : 'mod'}/${mr.slug}`,
+      slug: mr.slug,
+      source: 'mr',
+      mrSlug: mr.slug,
+      cfId: cf?.id || null,
     });
   }
 
@@ -164,6 +237,10 @@ export async function fetchMergedProjects(modrinthUser: string, cfKnownProject: 
       mrUrl: null,
       cfUrl: cf.links.websiteUrl,
       linkUrl: cf.links.websiteUrl,
+      slug: cf.slug,
+      source: 'cf',
+      mrSlug: null,
+      cfId: cf.id,
     });
   }
 
@@ -198,6 +275,32 @@ export async function fetchGitHubRepo(owner: string, repo: string): Promise<GitH
 export async function fetchGitHubRawFile(owner: string, repo: string, branch: string, path: string): Promise<string | null> {
   try {
     const res = await fetch(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`);
+    if (!res.ok) return null;
+    return await res.text();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Parses a GitHub URL like `https://github.com/owner/repo` (optionally with `.git`, trailing slash, or extra path segments).
+ * Returns null if the URL is not a GitHub repository URL.
+ */
+export function parseGitHubUrl(url: string): { owner: string; repo: string } | null {
+  if (!url) return null;
+  const m = url.match(/^https?:\/\/(?:www\.)?github\.com\/([^\/\s]+)\/([^\/\s#?]+?)(?:\.git)?(?:\/|$|#|\?)/i);
+  return m ? {owner: m[1], repo: m[2]} : null;
+}
+
+/**
+ * Fetches the README of a GitHub repo. Uses the `/readme` endpoint which auto-resolves the default branch
+ * and correct filename casing, returning raw content when requested with the raw media type.
+ */
+export async function fetchReadme(owner: string, repo: string): Promise<string | null> {
+  try {
+    const res = await fetch(`${GITHUB_BASE}/repos/${owner}/${repo}/readme`, {
+      headers: {Accept: 'application/vnd.github.raw+json'},
+    });
     if (!res.ok) return null;
     return await res.text();
   } catch {

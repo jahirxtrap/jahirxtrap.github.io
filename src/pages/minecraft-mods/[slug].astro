@@ -1,0 +1,302 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import {ArrowLeft, ImageOff} from 'lucide-astro';
+import {fetchMergedProjects} from '@/utils/api';
+
+export async function getStaticPaths() {
+  const {projects} = await fetchMergedProjects('jahirtrap', 'Wall-Jump TXF');
+  return projects.map(p => ({
+    params: {slug: p.slug},
+    props: {
+      initialTitle: p.title,
+      initialDesc: p.description,
+      initialIcon: p.icon_url,
+      isResourcePack: p.project_type === 'resourcepack',
+      source: p.source,
+      mrSlug: p.mrSlug,
+      cfId: p.cfId,
+    },
+  }));
+}
+
+const {slug} = Astro.params;
+const {initialTitle, initialDesc, initialIcon, isResourcePack, source, mrSlug, cfId} = Astro.props;
+const backUrl = isResourcePack ? '/minecraft-mods?tab=packs' : '/minecraft-mods';
+const backKey = isResourcePack ? 'mods.back_to_packs' : 'mods.back_to_mods';
+---
+
+<BaseLayout title={`jahirtrap — ${initialTitle}`}>
+    <div class="space-y-4">
+        <!-- Back link -->
+        <a href={backUrl}
+           class="inline-flex items-center gap-2 text-sm text-app-text-secondary hover:text-app-text-primary transition-colors">
+            <ArrowLeft class="w-4 h-4"/>
+            <span data-i18n={backKey}></span>
+        </a>
+
+        <!-- Header -->
+        <div class="rounded-xl border border-app-border bg-app-surface p-4">
+            <div class="flex items-center gap-4">
+                <div class="relative w-16 h-16 rounded-xl bg-app-surface-dark flex-shrink-0 overflow-hidden">
+                    <ImageOff class="w-7 h-7 text-app-text-secondary absolute inset-0 m-auto" id="mod-logo-fallback"/>
+                    <img src={initialIcon} alt={initialTitle}
+                         class="absolute inset-0 object-contain hidden"
+                         id="mod-logo"
+                         onload="this.classList.remove('hidden'); document.getElementById('mod-logo-fallback').classList.add('hidden')"/>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-2xl font-bold text-app-text-primary" id="mod-title">{initialTitle}</h1>
+                    <p class="text-sm text-app-text-secondary mt-1" id="mod-description">{initialDesc}</p>
+                </div>
+            </div>
+
+            <!-- Loaders + Categories -->
+            <div class="flex flex-wrap gap-1.5 empty:hidden [&:not(:empty)]:mt-3" id="mod-meta"></div>
+
+            <!-- Links -->
+            <div class="flex flex-wrap gap-2 empty:hidden [&:not(:empty)]:mt-3" id="mod-links"></div>
+        </div>
+
+        <!-- Downloads -->
+        <div class="rounded-xl border border-app-border bg-app-surface p-4">
+            <h2 class="text-lg font-semibold text-app-text-primary mb-3" data-i18n="mods.total_downloads"></h2>
+            <div class="flex flex-wrap gap-2" id="mod-total-downloads"></div>
+        </div>
+
+        <!-- Gallery -->
+        <div class="rounded-xl border border-app-border bg-app-surface p-4 hidden" id="mod-gallery-section">
+            <h2 class="text-lg font-semibold text-app-text-primary mb-3" data-i18n="mods.screenshots"></h2>
+            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" id="mod-gallery"></div>
+        </div>
+
+        <!-- Description (README) -->
+        <div class="rounded-xl border border-app-border bg-app-surface p-4">
+            <h2 class="text-lg font-semibold text-app-text-primary mb-3" data-i18n="mods.description"></h2>
+            <div id="mod-readme">
+                <p class="text-sm text-app-text-secondary" data-i18n="mods.loading"></p>
+            </div>
+        </div>
+    </div>
+
+    <script define:vars={{slug, source, mrSlug, cfId}}>
+      window.__modSlug = slug;
+      window.__modSource = source;
+      window.__modMrSlug = mrSlug;
+      window.__modCfId = cfId;
+    </script>
+
+    <script>
+      import {
+        fetchModrinthProject,
+        findCurseForgeByTitle, fetchCurseForgeMod, fetchCurseForgeDescription,
+        parseGitHubUrl, fetchReadme, formatDownloads,
+        type ModrinthProject, type CurseForgeProject,
+      } from '@/utils/api';
+      import {getLang, t, onLangChange, type Lang} from '@/utils/i18n';
+      import {renderMarkdown, sanitizeHtml, addCopyButtons, markdownStyles} from '@/utils/markdown';
+      import {createBadge} from '@/utils/badge';
+
+      const slug = (window as any).__modSlug as string;
+      const source = (window as any).__modSource as 'mr' | 'cf';
+      const cfIdProp = (window as any).__modCfId as number | null;
+
+      // Normalized shape that works for both Modrinth-backed and CurseForge-only projects
+      interface Display {
+        title: string;
+        description: string;
+        loaders: string[];
+        categories: string[];
+        mrTotal: number;
+        cfTotal: number;
+        modrinthUrl: string | null;
+        curseforgeUrl: string | null;
+        sourceUrl: string | null;
+        issuesUrl: string | null;
+        wikiUrl: string | null;
+        gallery: { url: string; title: string }[];
+        modrinthBody: string;
+        cfId: number | null;
+      }
+
+      function fromMr(mr: ModrinthProject, cf: CurseForgeProject | null): Display {
+        return {
+          title: mr.title,
+          description: mr.description,
+          loaders: mr.loaders || [],
+          categories: mr.categories || [],
+          mrTotal: mr.downloads,
+          cfTotal: cf?.downloadCount || 0,
+          modrinthUrl: `https://modrinth.com/${mr.project_type === 'resourcepack' ? 'resourcepack' : 'mod'}/${mr.slug}`,
+          curseforgeUrl: cf?.links.websiteUrl || null,
+          sourceUrl: mr.source_url || null,
+          issuesUrl: mr.issues_url || null,
+          wikiUrl: mr.wiki_url || null,
+          gallery: mr.gallery?.length
+            ? mr.gallery.map(g => ({url: g.url, title: g.title}))
+            : (cf?.screenshots || []).map(s => ({url: s.url, title: s.title})),
+          modrinthBody: mr.body || '',
+          cfId: cf?.id || null,
+        };
+      }
+
+      function fromCf(cf: CurseForgeProject): Display {
+        return {
+          title: cf.name,
+          description: cf.summary,
+          loaders: [],
+          categories: (cf.categories || []).map(c => c.name),
+          mrTotal: 0,
+          cfTotal: cf.downloadCount,
+          modrinthUrl: null,
+          curseforgeUrl: cf.links.websiteUrl,
+          sourceUrl: cf.links.sourceUrl || null,
+          issuesUrl: cf.links.issuesUrl || null,
+          wikiUrl: cf.links.wikiUrl || null,
+          gallery: (cf.screenshots || []).map(s => ({url: s.url, title: s.title})),
+          modrinthBody: '',
+          cfId: cf.id,
+        };
+      }
+
+      function capitalize(s: string): string {
+        return s.charAt(0).toUpperCase() + s.slice(1);
+      }
+
+      function fmtCategory(s: string): string {
+        return s.split(/[-_\s]/).filter(Boolean).map(capitalize).join(' ');
+      }
+
+      function renderMeta(d: Display) {
+        const meta = document.getElementById('mod-meta')!;
+        meta.textContent = '';
+        d.loaders.forEach(l => meta.appendChild(createBadge(capitalize(l), {accent: true})));
+        d.categories.forEach(c => meta.appendChild(createBadge(fmtCategory(c))));
+      }
+
+      function renderLinks(lang: Lang, d: Display) {
+        const linksEl = document.getElementById('mod-links')!;
+        linksEl.textContent = '';
+        if (d.curseforgeUrl) linksEl.appendChild(createBadge(t(lang, 'mods.curseforge'), {
+          href: d.curseforgeUrl,
+          icon: 'ExternalLink'
+        }));
+        if (d.modrinthUrl) linksEl.appendChild(createBadge(t(lang, 'mods.modrinth'), {
+          href: d.modrinthUrl,
+          icon: 'ExternalLink'
+        }));
+        if (d.sourceUrl) linksEl.appendChild(createBadge(t(lang, 'mods.source_code'), {
+          href: d.sourceUrl,
+          icon: 'Code'
+        }));
+        if (d.issuesUrl) linksEl.appendChild(createBadge(t(lang, 'mods.issues'), {href: d.issuesUrl, icon: 'Bug'}));
+        if (d.wikiUrl) linksEl.appendChild(createBadge(t(lang, 'mods.wiki'), {href: d.wikiUrl, icon: 'BookOpen'}));
+      }
+
+      function renderDownloads(lang: Lang, d: Display) {
+        const totalEl = document.getElementById('mod-total-downloads')!;
+        totalEl.textContent = '';
+        if (d.cfTotal > 0) totalEl.appendChild(createBadge(`${t(lang, 'mods.curseforge')}: ${formatDownloads(d.cfTotal)}`));
+        if (d.mrTotal > 0) totalEl.appendChild(createBadge(`${t(lang, 'mods.modrinth')}: ${formatDownloads(d.mrTotal)}`));
+        totalEl.appendChild(createBadge(formatDownloads(d.mrTotal + d.cfTotal), {accent: true, icon: 'Download'}));
+      }
+
+      function renderGallery(items: { url: string; title: string }[]) {
+        if (items.length === 0) return;
+        const section = document.getElementById('mod-gallery-section')!;
+        const grid = document.getElementById('mod-gallery')!;
+        grid.textContent = '';
+        section.classList.remove('hidden');
+        for (const item of items) {
+          const link = document.createElement('a');
+          link.href = item.url;
+          link.target = '_blank';
+          link.rel = 'noopener';
+          link.className = 'block rounded-lg overflow-hidden border border-app-border bg-app-surface-dark hover:border-app-accent transition-colors aspect-[4/3]';
+          const img = document.createElement('img');
+          img.src = item.url;
+          img.alt = item.title || '';
+          img.loading = 'lazy';
+          img.className = 'w-full h-full object-contain';
+          link.appendChild(img);
+          grid.appendChild(link);
+        }
+      }
+
+      async function renderReadme(lang: Lang, d: Display) {
+        const readmeEl = document.getElementById('mod-readme')!;
+
+        // renderMarkdown()/sanitizeHtml() both run output through DOMPurify — safe to assign.
+        const showContent = (cleanHtml: string, withCopyButtons: boolean) => {
+          readmeEl.textContent = '';
+          const content = document.createElement('div');
+          content.className = markdownStyles;
+          content.innerHTML = cleanHtml;
+          readmeEl.appendChild(content);
+          if (withCopyButtons) addCopyButtons(content);
+        };
+
+        // 1. GitHub README (preferred — has install instructions, changelog, etc.)
+        if (d.sourceUrl) {
+          const gh = parseGitHubUrl(d.sourceUrl);
+          if (gh) {
+            const md = await fetchReadme(gh.owner, gh.repo);
+            if (md) return showContent(await renderMarkdown(md), true);
+          }
+        }
+
+        // 2. Modrinth body (markdown)
+        if (d.modrinthBody.trim()) return showContent(await renderMarkdown(d.modrinthBody), true);
+
+        // 3. CurseForge description (raw HTML)
+        if (d.cfId !== null) {
+          const html = await fetchCurseForgeDescription(d.cfId);
+          if (html?.trim()) return showContent(sanitizeHtml(html), false);
+        }
+
+        // 4. Nothing available
+        readmeEl.textContent = '';
+        const p = document.createElement('p');
+        p.className = 'text-sm text-app-text-secondary';
+        p.setAttribute('data-i18n', 'mods.description_unavailable');
+        p.textContent = t(lang, 'mods.description_unavailable');
+        readmeEl.appendChild(p);
+      }
+
+      function showNotFound(lang: Lang) {
+        document.getElementById('mod-title')!.textContent = t(lang, 'mods.not_found');
+        document.getElementById('mod-description')!.textContent = '';
+      }
+
+      async function load() {
+        const lang0 = getLang();
+
+        let display: Display;
+        if (source === 'mr') {
+          const mr = await fetchModrinthProject(slug);
+          if (!mr) return showNotFound(lang0);
+          const cf = await findCurseForgeByTitle(mr.title);
+          display = fromMr(mr, cf);
+        } else {
+          if (cfIdProp === null) return showNotFound(lang0);
+          const cf = await fetchCurseForgeMod(cfIdProp);
+          if (!cf) return showNotFound(lang0);
+          display = fromCf(cf);
+        }
+
+        document.getElementById('mod-title')!.textContent = display.title;
+        document.getElementById('mod-description')!.textContent = display.description;
+        renderMeta(display);
+        renderGallery(display.gallery);
+
+        onLangChange(lang => {
+          renderLinks(lang, display);
+          renderDownloads(lang, display);
+        });
+
+        renderReadme(lang0, display);
+      }
+
+      load();
+    </script>
+</BaseLayout>

@@ -30,7 +30,16 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
       import {createBadge} from '@/utils/badge';
       import {createIcon} from '@/utils/icons';
 
-      let activeTab = 'mods';
+      let activeTab: 'mods' | 'packs' = new URLSearchParams(window.location.search).get('tab') === 'packs' ? 'packs' : 'mods';
+
+      // Ensure the query reflects the current tab on initial load
+      {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('tab') !== activeTab) {
+          url.searchParams.set('tab', activeTab);
+          window.history.replaceState(null, '', url.pathname + url.search);
+        }
+      }
 
       function updateTabs() {
         const tabMods = document.getElementById('tab-mods')!;
@@ -51,20 +60,20 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
         }
       }
 
-      document.getElementById('tab-mods')!.addEventListener('click', () => {
-        activeTab = 'mods';
+      function setTab(tab: 'mods' | 'packs') {
+        activeTab = tab;
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tab);
+        window.history.replaceState(null, '', url.pathname + url.search);
         updateTabs();
-      });
-      document.getElementById('tab-packs')!.addEventListener('click', () => {
-        activeTab = 'packs';
-        updateTabs();
-      });
+      }
+
+      document.getElementById('tab-mods')!.addEventListener('click', () => setTab('mods'));
+      document.getElementById('tab-packs')!.addEventListener('click', () => setTab('packs'));
 
       function createProjectCard(project: MergedProject): HTMLElement {
         const card = document.createElement('a');
-        card.href = project.linkUrl;
-        card.target = '_blank';
-        card.rel = 'noopener';
+        card.href = `/minecraft-mods/${project.slug}`;
         card.className = 'group p-4 rounded-xl border border-app-border bg-app-surface hover:bg-app-surface-dark transition-colors';
 
         const header = document.createElement('div');
@@ -101,7 +110,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
           badges.appendChild(createBadge(`CF ${formatDownloads(project.cfDownloads)}`));
         if (project.mrDownloads > 0)
           badges.appendChild(createBadge(`MR ${formatDownloads(project.mrDownloads)}`));
-        badges.appendChild(createBadge(formatDownloads(project.totalDownloads), {accent: true}));
+        badges.appendChild(createBadge(formatDownloads(project.totalDownloads), {accent: true, icon: 'Download'}));
 
         info.appendChild(badges);
         header.appendChild(info);

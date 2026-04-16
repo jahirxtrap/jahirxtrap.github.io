@@ -13,8 +13,8 @@
     "android_desc": "Aplicaciones publicadas en Google Play.",
     "view_all": "Ver Todos",
     "play_store": "Google Play",
-    "libraries": "Librerias Maven",
-    "libraries_desc": "Librerias de codigo abierto publicadas en Maven Central."
+    "libraries": "Librerías Maven",
+    "libraries_desc": "Librerías de código abierto publicadas en Maven Central."
   },
   "mods": {
     "title": "Mods de Minecraft",
@@ -22,33 +22,45 @@
     "downloads": "descargas",
     "versions": "Versiones",
     "loaders": "Loaders",
-    "description": "Descripcion",
+    "description": "Descripción",
     "links": "Enlaces",
-    "source_code": "Codigo Fuente",
+    "source_code": "Código Fuente",
     "issues": "Problemas",
-    "gallery": "Galeria",
-    "documentation": "Documentacion",
+    "wiki": "Wiki",
+    "gallery": "Galería",
+    "documentation": "Documentación",
     "no_mods": "No se encontraron mods.",
-    "loading": "Cargando mods...",
+    "loading": "Cargando...",
     "error": "Error al cargar mods.",
     "curseforge": "CurseForge",
     "modrinth": "Modrinth",
     "total_downloads": "Descargas Totales",
     "mods_title": "Mods",
-    "packs_title": "Paquetes de Recursos"
+    "packs_title": "Paquetes de Recursos",
+    "back_to_mods": "Volver a Mods",
+    "back_to_packs": "Volver a Paquetes de Recursos",
+    "not_found": "Mod no encontrado.",
+    "screenshots": "Capturas de pantalla",
+    "description_unavailable": "No hay descripción disponible para este mod.",
+    "categories": "Categorías"
   },
   "libraries": {
-    "title": "Librerias Maven",
-    "subtitle": "Librerias de codigo abierto publicadas en Maven Central",
+    "title": "Librerías Maven",
+    "subtitle": "Librerías de código abierto publicadas en Maven Central",
     "maven_central": "Maven Central",
-    "documentation": "Documentacion",
-    "source_code": "Codigo Fuente",
+    "documentation": "Documentación",
+    "source_code": "Código Fuente",
     "loading": "Cargando...",
-    "error": "Error al cargar librerias.",
-    "latest": "Ultima",
+    "error": "Error al cargar librerías.",
+    "latest": "Última",
     "versions": "versiones",
     "license": "Licencia",
     "profile": "Perfil Maven"
+  },
+  "error": {
+    "not_found_title": "Página no encontrada",
+    "not_found_subtitle": "La página que buscas no existe o ha sido movida.",
+    "back_home": "Volver al Inicio"
   },
   "footer": {
     "made_by": "Hecho por"
@@ -58,7 +70,7 @@
     "dark": "Oscuro"
   },
   "lang": {
-    "en": "Ingles",
-    "es": "Espanol"
+    "en": "Inglés",
+    "es": "Español"
   }
 }
