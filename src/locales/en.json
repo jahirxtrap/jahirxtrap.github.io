@@ -60,7 +60,8 @@
     "latest": "Latest",
     "versions": "versions",
     "license": "License",
-    "profile": "Maven Profile"
+    "profile": "Maven Profile",
+    "back": "Back to Libraries"
   },
   "error": {
     "not_found_title": "Page not found",

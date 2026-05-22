@@ -60,7 +60,8 @@
     "latest": "Última",
     "versions": "versiones",
     "license": "Licencia",
-    "profile": "Perfil Maven"
+    "profile": "Perfil Maven",
+    "back": "Volver a Librerías"
   },
   "error": {
     "not_found_title": "Página no encontrada",

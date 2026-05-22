@@ -2,6 +2,10 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import {Blocks, Smartphone, Code2, ExternalLink, ImageOff, Bot, KeyRound, Lock} from 'lucide-astro';
 import Badge from '@/components/Badge.astro';
+import {projects} from '@/data/projects';
+
+const iconMap = {Blocks, Code2, Smartphone, Bot, KeyRound};
+const badgeIconMap = {ExternalLink, Lock};
 ---
 
 <BaseLayout title="jahirtrap — Developer">
@@ -31,71 +35,53 @@ import Badge from '@/components/Badge.astro';
             <h2 class="text-xl font-bold text-app-text-primary mb-6" data-i18n="home.projects"></h2>
 
             <div class="grid gap-4 sm:grid-cols-2">
-                <a href="/minecraft-mods"
-                   class="group p-6 rounded-xl border border-app-border bg-app-surface hover:bg-app-surface-dark transition-colors">
-                    <div class="flex items-center gap-3 mb-2">
-                        <Blocks class="w-6 h-6 text-app-accent"/>
-                        <h3 class="text-lg font-semibold text-app-text-primary" data-i18n="home.minecraft"></h3>
-                    </div>
-                    <p class="text-sm text-app-text-secondary" data-i18n="home.minecraft_desc"></p>
-                    <span class="inline-block mt-3 text-sm text-app-accent group-hover:underline"
-                          data-i18n="home.view_all"></span>
-                </a>
-
-                <a href="/maven-libraries"
-                   class="group p-6 rounded-xl border border-app-border bg-app-surface hover:bg-app-surface-dark transition-colors">
-                    <div class="flex items-center gap-3 mb-2">
-                        <Code2 class="w-6 h-6 text-app-accent"/>
-                        <h3 class="text-lg font-semibold text-app-text-primary" data-i18n="home.libraries"></h3>
-                    </div>
-                    <p class="text-sm text-app-text-secondary" data-i18n="home.libraries_desc"></p>
-                    <span class="inline-block mt-3 text-sm text-app-accent group-hover:underline"
-                          data-i18n="home.view_all"></span>
-                </a>
-
-                <a href="https://play.google.com/store/apps/developer?id=jahirtrap" target="_blank" rel="noopener"
-                   class="group p-6 rounded-xl border border-app-border bg-app-surface hover:bg-app-surface-dark transition-colors">
-                    <div class="flex items-center gap-3 mb-2">
-                        <Smartphone class="w-6 h-6 text-app-accent"/>
-                        <h3 class="text-lg font-semibold text-app-text-primary" data-i18n="home.android"></h3>
-                    </div>
-                    <p class="text-sm text-app-text-secondary" data-i18n="home.android_desc"></p>
-                    <span class="inline-block mt-3 text-sm text-app-accent group-hover:underline"
-                          data-i18n="home.play_store"></span>
-                </a>
-
-                <div class="p-6 rounded-xl border border-app-border bg-app-surface">
-                    <div class="flex items-center gap-3 mb-2">
-                        <Bot class="w-6 h-6 text-app-accent"/>
-                        <h3 class="text-lg font-semibold text-app-text-primary">Sudial</h3>
-                    </div>
-                    <p class="text-sm text-app-text-secondary mb-3" data-i18n="home.sudial_desc"></p>
-                    <div class="flex flex-wrap gap-2">
-                        <Badge i18n="home.private" accent>
-                            <Lock class="w-3 h-3"/>
-                        </Badge>
-                        <Badge href="https://sudial.com/" i18n="home.website">
-                            <ExternalLink class="w-3 h-3"/>
-                        </Badge>
-                        <Badge href="https://play.google.com/store/apps/details?id=com.sudial" i18n="home.play_store">
-                            <ExternalLink class="w-3 h-3"/>
-                        </Badge>
-                        <Badge href="https://apps.apple.com/app/sudial/id6759458373" i18n="home.app_store">
-                            <ExternalLink class="w-3 h-3"/>
-                        </Badge>
-                    </div>
-                </div>
-
-                <div class="p-6 rounded-xl border border-app-border bg-app-surface">
-                    <div class="flex items-center gap-3 mb-2">
-                        <KeyRound class="w-6 h-6 text-app-accent"/>
-                        <h3 class="text-lg font-semibold text-app-text-primary">OTP Cuentas</h3>
-                    </div>
-                    <p class="text-sm text-app-text-secondary mb-3" data-i18n="home.otp_desc"></p>
-                    <Badge i18n="home.private" accent>
-                        <Lock class="w-3 h-3"/>
-                    </Badge>
-                </div>
+                {projects.map(project => {
+                  const Icon = iconMap[project.icon];
+                  const isExternal = project.href?.startsWith('http');
+                  const linkAttrs = project.href ? {
+                    href: project.href,
+                    ...(isExternal ? {target: '_blank', rel: 'noopener'} : {}),
+                  } : null;
+                  const cardClass = 'p-6 rounded-xl border border-app-border bg-app-surface' +
+                    (project.href ? ' group hover:bg-app-surface-dark transition-colors' : '');
+                  const titleAttrs = project.titleIsKey ? {'data-i18n': project.title} : {};
+                  const titleText = project.titleIsKey ? '' : project.title;
+                  return linkAttrs ? (
+                          <a {...linkAttrs} class={cardClass}>
+                              <div class="flex items-center gap-3 mb-2">
+                                  <Icon class="w-6 h-6 text-app-accent"/>
+                                  <h3 class="text-lg font-semibold text-app-text-primary"
+                                      {...titleAttrs}>{titleText}</h3>
+                              </div>
+                              <p class="text-sm text-app-text-secondary" data-i18n={project.descKey}></p>
+                              {project.ctaKey && (
+                                      <span class="inline-block mt-3 text-sm text-app-accent group-hover:underline"
+                                            data-i18n={project.ctaKey}></span>
+                              )}
+                          </a>
+                  ) : (
+                          <div class={cardClass}>
+                              <div class="flex items-center gap-3 mb-2">
+                                  <Icon class="w-6 h-6 text-app-accent"/>
+                                  <h3 class="text-lg font-semibold text-app-text-primary"
+                                      {...titleAttrs}>{titleText}</h3>
+                              </div>
+                              <p class="text-sm text-app-text-secondary mb-3" data-i18n={project.descKey}></p>
+                              {project.badges && project.badges.length > 0 && (
+                                      <div class="flex flex-wrap gap-2">
+                                        {project.badges.map(badge => {
+                                          const BadgeIcon = badge.icon ? badgeIconMap[badge.icon] : null;
+                                          return (
+                                                  <Badge href={badge.href} i18n={badge.textKey} accent={badge.accent}>
+                                                    {BadgeIcon && <BadgeIcon class="w-3 h-3"/>}
+                                                  </Badge>
+                                          );
+                                        })}
+                                      </div>
+                              )}
+                          </div>
+                  );
+                })}
             </div>
         </section>
     </div>

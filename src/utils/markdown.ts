@@ -1,14 +1,67 @@
-import {marked} from 'marked';
+import {Marked} from 'marked';
 import DOMPurify from 'dompurify';
 import {createIcon} from './icons';
 
-export async function renderMarkdown(md: string): Promise<string> {
-  const html = await marked.parse(md);
-  return DOMPurify.sanitize(html);
+function slugifyHeading(s: string): string {
+  return s
+    .replace(/[()]/g, ' ')
+    .replace(/[,\s]+/g, '-')
+    .replace(/[.<>]/g, '-')
+    .toLowerCase()
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function tokensToPlainText(tokens: any[]): string {
+  return tokens.map(t => {
+    if (typeof t.text === 'string') return t.text;
+    if (t.tokens) return tokensToPlainText(t.tokens);
+    return t.raw ?? '';
+  }).join('');
+}
+
+const md = new Marked({
+  renderer: {
+    heading({tokens, depth}: any) {
+      const inner = (this as any).parser.parseInline(tokens);
+      const id = slugifyHeading(tokensToPlainText(tokens));
+      return `<h${depth} id="${id}">${inner}</h${depth}>\n`;
+    },
+  },
+});
+
+export async function renderMarkdown(input: string): Promise<string> {
+  const html = await md.parse(input);
+  return DOMPurify.sanitize(html, {ADD_ATTR: ['id']});
 }
 
 export function sanitizeHtml(html: string): string {
   return DOMPurify.sanitize(html);
+}
+
+/**
+ * Replaces internal `.md` links with click handlers that fire `onNavigate(target, anchor)`,
+ * so they trigger in-page navigation instead of a hard URL load. External links and pure
+ * fragments are left untouched.
+ */
+export function interceptMarkdownLinks(
+  container: Element,
+  onNavigate: (target: string, anchor: string | null) => void
+): void {
+  container.querySelectorAll<HTMLAnchorElement>('a').forEach(a => {
+    const href = a.getAttribute('href');
+    if (!href || /^https?:/.test(href) || href.startsWith('#')) return;
+    const m = href.match(/^([^#]*?)(?:\.md)?(#.*)?$/);
+    if (!m || (!m[1] && !m[2])) return;
+    const target = m[1];
+    const anchor = m[2] ? m[2].slice(1) : null;
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      onNavigate(target, anchor);
+    });
+    a.removeAttribute('href');
+    a.classList.add('cursor-pointer');
+  });
 }
 
 export function addCopyButtons(container: Element): void {

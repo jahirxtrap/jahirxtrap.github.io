@@ -282,6 +282,23 @@ export async function fetchGitHubRawFile(owner: string, repo: string, branch: st
   }
 }
 
+export interface GitHubContentItem {
+  name: string;
+  type: 'file' | 'dir';
+}
+
+export async function fetchGitHubDirListing(owner: string, repo: string, branch: string, path: string): Promise<GitHubContentItem[]> {
+  try {
+    const res = await fetch(`${GITHUB_BASE}/repos/${owner}/${repo}/contents/${path}?ref=${branch}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!Array.isArray(data)) return [];
+    return data.map((item: any) => ({ name: item.name, type: item.type }));
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Parses a GitHub URL like `https://github.com/owner/repo` (optionally with `.git`, trailing slash, or extra path segments).
  * Returns null if the URL is not a GitHub repository URL.

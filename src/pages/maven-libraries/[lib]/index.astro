@@ -1,0 +1,439 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import {ArrowLeft, ChevronDown, ChevronRight, ExternalLink, ImageOff} from 'lucide-astro';
+import Badge from '@/components/Badge.astro';
+import {libraries} from '@/data/maven-libraries';
+
+export async function getStaticPaths() {
+  return libraries.map(lib => ({
+    params: {lib: lib.id},
+    props: {libConfig: lib},
+  }));
+}
+
+const {libConfig} = Astro.props as {libConfig: typeof libraries[number]};
+const lib = libConfig;
+const hasWiki = lib.wikiPages.length > 0;
+const hasJavadoc = !!(lib.javadocMcVersions && lib.javadocMcVersions.length > 0);
+
+function formatPageName(page: string): string {
+  return page.replace(/-/g, ' ').replace(/&amp;/g, '&').replace(/&/g, '&');
+}
+---
+
+<BaseLayout title={`jahirtrap — ${lib.id}`}>
+    <div class="space-y-4">
+        <a href="/maven-libraries"
+           class="inline-flex items-center gap-2 text-sm text-app-text-secondary hover:text-app-text-primary transition-colors">
+            <ArrowLeft class="w-4 h-4"/>
+            <span data-i18n="libraries.back"></span>
+        </a>
+
+        <!-- Header card -->
+        <div class="rounded-xl border border-app-border bg-app-surface p-5">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-xl bg-app-surface-dark flex items-center justify-center flex-shrink-0"
+                     id="lib-logo-fallback">
+                    <ImageOff class="w-7 h-7 text-app-text-secondary"/>
+                </div>
+                {lib.logoPath && (
+                        <img src={`https://raw.githubusercontent.com/${lib.repo}/${lib.branch}/${lib.logoPath}`}
+                             alt={lib.id} class="w-16 h-16 rounded-xl hidden flex-shrink-0" id="lib-logo"
+                             onload="this.classList.remove('hidden');document.getElementById('lib-logo-fallback').classList.add('hidden')"/>
+                )}
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-2xl font-bold text-app-text-primary" id="lib-name">{lib.id}</h1>
+                    <p class="text-sm text-app-text-secondary mt-1" id="lib-desc"></p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 empty:hidden [&:not(:empty)]:mt-3" id="maven-stats"></div>
+
+            <div class="mt-3 flex flex-wrap gap-2">
+                <Badge href={`https://central.sonatype.com/artifact/${lib.mavenGroup}/${lib.mavenArtifact}`}
+                       i18n="libraries.maven_central">
+                    <ExternalLink class="w-3 h-3"/>
+                </Badge>
+                <Badge href={`https://github.com/${lib.repo}`} i18n="libraries.source_code">
+                    <ExternalLink class="w-3 h-3"/>
+                </Badge>
+                {hasWiki && (
+                        <Badge href={`https://github.com/${lib.repo}/wiki`} text="Wiki">
+                            <ExternalLink class="w-3 h-3"/>
+                        </Badge>
+                )}
+                {hasJavadoc && (
+                        <Badge href={`https://javadoc.io/doc/${lib.mavenGroup}/${lib.mavenArtifact}`} text="Javadoc">
+                            <ExternalLink class="w-3 h-3"/>
+                        </Badge>
+                )}
+            </div>
+        </div>
+
+        <!-- Documentation section -->
+        {hasWiki && (
+                <div class="rounded-xl border border-app-border bg-app-surface p-5">
+                    <button class="section-toggle w-full flex items-center justify-between text-sm font-semibold text-app-text-primary cursor-pointer"
+                            data-target="section-docs">
+                        <span data-i18n="libraries.documentation"></span>
+                        <span class="text-app-text-secondary">
+                            <span class="toggle-icon-right"><ChevronRight class="w-4 h-4"/></span>
+                            <span class="toggle-icon-down hidden"><ChevronDown class="w-4 h-4"/></span>
+                        </span>
+                    </button>
+
+                    <div id="section-docs" class="hidden">
+                        <div class="flex gap-4 mt-3 pt-3 border-t border-app-border">
+                            <nav class="flex-shrink-0 w-48 space-y-1">
+                                {lib.wikiPages.map((page, i) => (
+                                        <button class="wiki-nav w-full text-left px-3 py-2 text-sm rounded-lg transition-colors cursor-pointer"
+                                                data-page={page} data-active={i === 0 ? 'true' : 'false'}>
+                                            {formatPageName(page)}
+                                        </button>
+                                ))}
+                            </nav>
+                            <div class="flex-1 min-w-0">
+                                {lib.wikiPages.map((page, i) => (
+                                        <div class={`wiki-content ${i === 0 ? '' : 'hidden'}`} data-page={page}>
+                                            <p class="text-sm text-app-text-secondary">...</p>
+                                        </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        )}
+
+        <!-- Javadoc section -->
+        {hasJavadoc && (
+                <div class="rounded-xl border border-app-border bg-app-surface p-5">
+                    <button class="section-toggle w-full flex items-center justify-between text-sm font-semibold text-app-text-primary cursor-pointer"
+                            data-target="section-javadoc">
+                        <span>Javadoc</span>
+                        <span class="text-app-text-secondary">
+                            <span class="toggle-icon-right"><ChevronRight class="w-4 h-4"/></span>
+                            <span class="toggle-icon-down hidden"><ChevronDown class="w-4 h-4"/></span>
+                        </span>
+                    </button>
+
+                    <div id="section-javadoc" class="hidden">
+                        <div class="pt-3 mt-3 border-t border-app-border space-y-3">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <label for="mc-select" class="text-sm text-app-text-secondary">MC</label>
+                                <select id="mc-select"
+                                        class="bg-app-surface-dark text-app-text-primary border border-app-border rounded px-2 py-1 text-sm cursor-pointer">
+                                    {lib.javadocMcVersions?.slice().reverse().map(mc => (
+                                            <option value={mc}>{mc}</option>
+                                    ))}
+                                </select>
+
+                                <label for="version-select" class="text-sm text-app-text-secondary">Version</label>
+                                <select id="version-select"
+                                        class="bg-app-surface-dark text-app-text-primary border border-app-border rounded px-2 py-1 text-sm cursor-pointer">
+                                    <option>...</option>
+                                </select>
+
+                                <span id="loader-row" class="contents hidden">
+                                    <label for="loader-select" class="text-sm text-app-text-secondary">Loader</label>
+                                    <select id="loader-select"
+                                            class="bg-app-surface-dark text-app-text-primary border border-app-border rounded px-2 py-1 text-sm cursor-pointer">
+                                    </select>
+                                </span>
+
+                                <span id="jdoc-status" class="ml-auto text-xs text-app-text-secondary"></span>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <nav id="jdoc-class-nav" class="flex-shrink-0 w-48 space-y-1">
+                                    <p class="text-sm text-app-text-secondary">Select a version...</p>
+                                </nav>
+                                <div id="jdoc-content" class="flex-1 min-w-0"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        )}
+    </div>
+
+    <script define:vars={{lib}}>
+      window.__lib = lib;
+    </script>
+
+    <script>
+      import {fetchGitHubRepo, fetchGitHubRawFile, fetchGitHubDirListing, fetchMavenInfo} from '@/utils/api';
+      import {getLang, t, onLangChange} from '@/utils/i18n';
+      import {renderMarkdown, addCopyButtons, interceptMarkdownLinks, markdownStyles} from '@/utils/markdown';
+      import {createBadge} from '@/utils/badge';
+
+      const lib = (window as any).__lib;
+      const [owner, repoName] = lib.repo.split('/');
+
+      // === Header: repo info ===
+      fetchGitHubRepo(owner, repoName).then(repo => {
+        if (!repo) return;
+        const nameEl = document.getElementById('lib-name');
+        const descEl = document.getElementById('lib-desc');
+        if (nameEl) nameEl.textContent = repo.name;
+        if (descEl) descEl.textContent = repo.description || '';
+      });
+
+      fetchMavenInfo(lib.mavenGroup, lib.mavenArtifact).then(info => {
+        if (!info) return;
+        const container = document.getElementById('maven-stats');
+        if (!container) return;
+        onLangChange(l => {
+          container.textContent = '';
+          container.appendChild(createBadge(`${t(l, 'libraries.latest')}: ${info.latestVersion}`, {accent: true}));
+          container.appendChild(createBadge(`${info.totalVersions} ${t(l, 'libraries.versions')}`));
+          container.appendChild(createBadge(`${t(l, 'libraries.license')}: ${info.license}`));
+        });
+      });
+
+      // === Section toggles ===
+      document.querySelectorAll('.section-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = (btn as HTMLElement).dataset.target!;
+          const body = document.getElementById(targetId)!;
+          const isHidden = body.classList.contains('hidden');
+          body.classList.toggle('hidden');
+          btn.querySelector('.toggle-icon-right')!.classList.toggle('hidden', isHidden);
+          btn.querySelector('.toggle-icon-down')!.classList.toggle('hidden', !isHidden);
+        });
+      });
+
+      // === Wiki ===
+      function navigateWiki(page: string, anchor: string | null) {
+        if (page) {
+          const btn = document.querySelector(`.wiki-nav[data-page="${page}"]`) as HTMLButtonElement | null;
+          btn?.click();
+        }
+        if (anchor) {
+          setTimeout(() => document.getElementById(anchor)?.scrollIntoView({behavior: 'smooth', block: 'start'}), 50);
+        }
+      }
+
+      if (lib.wikiPages && lib.wikiPages.length > 0) {
+        for (const page of lib.wikiPages) {
+          fetchGitHubRawFile(owner, repoName, lib.branch, `wiki/${page}.md`).then(async (md) => {
+            if (!md) return;
+            const safeHtml = await renderMarkdown(md);
+            const container = document.querySelector(`.wiki-content[data-page="${page}"]`);
+            if (!container) return;
+            container.textContent = '';
+            const wrap = document.createElement('div');
+            wrap.className = markdownStyles;
+            const parsed = new DOMParser().parseFromString(safeHtml, 'text/html');
+            Array.from(parsed.body.childNodes).forEach(n => wrap.appendChild(n));
+            container.appendChild(wrap);
+            addCopyButtons(wrap);
+            interceptMarkdownLinks(wrap, navigateWiki);
+          });
+        }
+
+        const updateWikiNavStyle = (active: string) => {
+          document.querySelectorAll<HTMLButtonElement>('.wiki-nav').forEach(b => {
+            const isActive = b.dataset.page === active;
+            b.dataset.active = isActive ? 'true' : 'false';
+            b.className = `wiki-nav w-full text-left px-3 py-2 text-sm rounded-lg transition-colors cursor-pointer ${isActive ? 'bg-app-accent text-app-text-inverse' : 'text-app-text-secondary hover:text-app-text-primary hover:bg-app-surface-dark'}`;
+          });
+        };
+        updateWikiNavStyle(lib.wikiPages[0]);
+
+        document.querySelectorAll<HTMLButtonElement>('.wiki-nav').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const page = btn.dataset.page!;
+            updateWikiNavStyle(page);
+            document.querySelectorAll<HTMLElement>('.wiki-content').forEach(c => {
+              c.classList.toggle('hidden', c.dataset.page !== page);
+            });
+          });
+        });
+      }
+
+      // === Javadoc ===
+      if (lib.javadocMcVersions && lib.javadocMcVersions.length > 0) {
+        const BRANCH = 'javadoc-md';
+        const mcSelect = document.getElementById('mc-select') as HTMLSelectElement;
+        const versionSelect = document.getElementById('version-select') as HTMLSelectElement;
+        const loaderRow = document.getElementById('loader-row')!;
+        const loaderSelect = document.getElementById('loader-select') as HTMLSelectElement;
+        const status = document.getElementById('jdoc-status')!;
+        const classNav = document.getElementById('jdoc-class-nav')!;
+        const content = document.getElementById('jdoc-content')!;
+
+        interface ManifestClass {
+          name: string;
+          order: number;
+          scope: 'shared' | 'per-loader';
+          loaders: string[];
+        }
+        interface Manifest {
+          title: string;
+          mcVersion: string;
+          modVersion: string;
+          classes: ManifestClass[];
+        }
+
+        let manifest: Manifest | null = null;
+        let activeClass: ManifestClass | null = null;
+        const contentCache = new Map<string, HTMLElement>();
+
+        function compareVersions(a: string, b: string): number {
+          const pa = a.split('.').map(Number);
+          const pb = b.split('.').map(Number);
+          for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+            const da = pa[i] || 0;
+            const db = pb[i] || 0;
+            if (da !== db) return da - db;
+          }
+          return 0;
+        }
+
+        async function loadVersions() {
+          const mc = mcSelect.value;
+          status.textContent = 'Loading versions...';
+          versionSelect.disabled = true;
+          versionSelect.textContent = '';
+          const items = await fetchGitHubDirListing(owner, repoName, BRANCH, mc);
+          const dirs = items.filter(i => i.type === 'dir').map(i => i.name).sort((a, b) => compareVersions(b, a));
+          if (dirs.length === 0) {
+            const opt = document.createElement('option');
+            opt.textContent = '(none)';
+            versionSelect.appendChild(opt);
+            status.textContent = 'No releases for this MC version.';
+            classNav.textContent = '';
+            const p = document.createElement('p');
+            p.className = 'text-sm text-app-text-secondary';
+            p.textContent = 'No data.';
+            classNav.appendChild(p);
+            return;
+          }
+          for (const v of dirs) {
+            const opt = document.createElement('option');
+            opt.value = v;
+            opt.textContent = v;
+            versionSelect.appendChild(opt);
+          }
+          versionSelect.disabled = false;
+          await loadManifest();
+        }
+
+        async function loadManifest() {
+          const mc = mcSelect.value;
+          const modVersion = versionSelect.value;
+          status.textContent = `Loading ${modVersion}...`;
+          classNav.textContent = '';
+          contentCache.clear();
+          const raw = await fetchGitHubRawFile(owner, repoName, BRANCH, `${mc}/${modVersion}/_index.json`);
+          if (!raw) {
+            status.textContent = `Failed to load index for ${modVersion}`;
+            return;
+          }
+          manifest = JSON.parse(raw) as Manifest;
+          renderClassNav();
+          // Pre-fetch all classes (every loader variant) in parallel so switching is instant.
+          const tasks: Promise<unknown>[] = [];
+          for (const c of manifest.classes) {
+            const subs = c.scope === 'shared' ? ['shared'] : c.loaders;
+            for (const sub of subs) {
+              tasks.push(prefetchContent(c.name, sub, mc, modVersion));
+            }
+          }
+          await Promise.all(tasks);
+          status.textContent = '';
+          if (manifest.classes.length > 0) selectClass(manifest.classes[0]);
+        }
+
+        async function prefetchContent(className: string, sub: string, mc: string, modVersion: string) {
+          const path = `${mc}/${modVersion}/${sub}/${className}.md`;
+          const md = await fetchGitHubRawFile(owner, repoName, BRANCH, path);
+          const wrap = document.createElement('div');
+          wrap.className = markdownStyles;
+          if (!md) {
+            const p = document.createElement('p');
+            p.className = 'text-sm text-app-danger';
+            p.textContent = `Failed to load ${path}`;
+            wrap.appendChild(p);
+          } else {
+            const safeHtml = await renderMarkdown(md);
+            const parsed = new DOMParser().parseFromString(safeHtml, 'text/html');
+            Array.from(parsed.body.childNodes).forEach(n => wrap.appendChild(n));
+            addCopyButtons(wrap);
+            interceptMarkdownLinks(wrap, navigateJavadoc);
+          }
+          contentCache.set(cacheKey(className, sub), wrap);
+        }
+
+        function navigateJavadoc(className: string, anchor: string | null) {
+          if (className && manifest) {
+            const cls = manifest.classes.find(c => c.name === className);
+            if (cls) selectClass(cls);
+          }
+          if (anchor) {
+            setTimeout(() => document.getElementById(anchor)?.scrollIntoView({behavior: 'smooth', block: 'start'}), 50);
+          }
+        }
+
+        function cacheKey(className: string, sub: string): string {
+          return `${className}/${sub}`;
+        }
+
+        function renderClassNav() {
+          if (!manifest) return;
+          classNav.textContent = '';
+          for (const c of manifest.classes) {
+            const btn = document.createElement('button');
+            btn.textContent = c.name;
+            btn.dataset.className = c.name;
+            btn.className = 'jdoc-class-btn w-full text-left px-3 py-2 text-sm rounded-lg cursor-pointer text-app-text-secondary hover:text-app-text-primary hover:bg-app-surface-dark transition-colors';
+            btn.addEventListener('click', () => selectClass(c));
+            classNav.appendChild(btn);
+          }
+        }
+
+        function selectClass(cls: ManifestClass) {
+          activeClass = cls;
+          classNav.querySelectorAll<HTMLButtonElement>('.jdoc-class-btn').forEach(b => {
+            const isActive = b.dataset.className === cls.name;
+            b.className = `jdoc-class-btn w-full text-left px-3 py-2 text-sm rounded-lg cursor-pointer transition-colors ${isActive ? 'bg-app-accent text-app-text-inverse' : 'text-app-text-secondary hover:text-app-text-primary hover:bg-app-surface-dark'}`;
+          });
+
+          if (cls.scope === 'per-loader' && cls.loaders.length > 1) {
+            loaderRow.classList.remove('hidden');
+            loaderSelect.textContent = '';
+            for (const l of cls.loaders) {
+              const opt = document.createElement('option');
+              opt.value = l;
+              opt.textContent = l;
+              loaderSelect.appendChild(opt);
+            }
+            loaderSelect.value = cls.loaders[0];
+          } else {
+            loaderRow.classList.add('hidden');
+          }
+          loadContent();
+        }
+
+        function loadContent() {
+          if (!manifest || !activeClass) return;
+          const sub = activeClass.scope === 'shared' ? 'shared' : (loaderSelect.value || activeClass.loaders[0]);
+          const cached = contentCache.get(cacheKey(activeClass.name, sub));
+          content.textContent = '';
+          if (cached) {
+            content.appendChild(cached);
+          } else {
+            const p = document.createElement('p');
+            p.className = 'text-sm text-app-text-secondary';
+            p.textContent = 'Loading...';
+            content.appendChild(p);
+          }
+        }
+
+        mcSelect.addEventListener('change', () => loadVersions());
+        versionSelect.addEventListener('change', () => loadManifest());
+        loaderSelect.addEventListener('change', () => loadContent());
+
+        loadVersions();
+      }
+    </script>
+</BaseLayout>
