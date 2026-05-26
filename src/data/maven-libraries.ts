@@ -18,6 +18,7 @@ export const libraries: Library[] = [
     logoPath: 'common/src/main/resources/logo.png',
     branch: 'master',
     wikiPages: ['Home', 'Configuration', 'Screen-&-Server-Sync'],
+    javadocMcVersions: ['1.20.1', '1.21.1', '1.21.11', '26.1.2'],
   },
   {
     id: 'backstube',
