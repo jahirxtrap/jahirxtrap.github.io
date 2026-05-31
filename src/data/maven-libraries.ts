@@ -38,6 +38,7 @@ export const libraries: Library[] = [
     logoPath: 'src/main/resources/logo.png',
     branch: 'master',
     wikiPages: ['Home'],
+    javadocMcVersions: ['1.18.2'],
   },
 ];
 
