@@ -17,9 +17,12 @@
     "libraries_desc": "Open source libraries published on Maven Central.",
     "sudial_desc": "SaaS platform that centralizes business communication through WhatsApp with chatbot automation.",
     "otp_desc": "Portal for accessing OTP codes for Disney accounts.",
+    "cconnect_desc": "Mobile companion for Claude Code - sessions, plugins, files, and live PC monitor.",
     "website": "Website",
     "app_store": "App Store",
-    "private": "Private"
+    "private": "Private",
+    "source": "Source",
+    "releases": "Releases"
   },
   "mods": {
     "title": "Minecraft Mods",

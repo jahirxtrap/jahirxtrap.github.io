@@ -10,7 +10,7 @@ export interface Project {
   title: string;
   titleIsKey?: boolean;
   descKey: string;
-  icon: 'Blocks' | 'Code2' | 'Smartphone' | 'Bot' | 'KeyRound';
+  icon: 'Blocks' | 'Code2' | 'Smartphone' | 'Bot' | 'KeyRound' | 'MonitorSmartphone';
   href?: string;
   ctaKey?: string;
   badges?: ProjectBadge[];
@@ -43,6 +43,16 @@ export const projects: Project[] = [
     icon: 'Smartphone',
     href: 'https://play.google.com/store/apps/developer?id=jahirtrap',
     ctaKey: 'home.play_store',
+  },
+  {
+    id: 'cconnect',
+    title: 'CConnect',
+    descKey: 'home.cconnect_desc',
+    icon: 'MonitorSmartphone',
+    badges: [
+      {textKey: 'home.source', href: 'https://github.com/jahirxtrap/cconnect', icon: 'ExternalLink'},
+      {textKey: 'home.releases', href: 'https://github.com/jahirxtrap/cconnect/releases', icon: 'ExternalLink'},
+    ],
   },
   {
     id: 'sudial',
