@@ -10,7 +10,7 @@ export interface Project {
   title: string;
   titleIsKey?: boolean;
   descKey: string;
-  icon: 'Blocks' | 'Code2' | 'Smartphone' | 'Bot' | 'KeyRound' | 'MonitorSmartphone';
+  icon: 'Blocks' | 'Code2' | 'Smartphone' | 'Bot' | 'KeyRound' | 'MonitorSmartphone' | 'Disc3';
   href?: string;
   ctaKey?: string;
   badges?: ProjectBadge[];
@@ -52,6 +52,15 @@ export const projects: Project[] = [
     badges: [
       {textKey: 'home.source', href: 'https://github.com/jahirxtrap/cconnect', icon: 'ExternalLink'},
       {textKey: 'home.releases', href: 'https://github.com/jahirxtrap/cconnect/releases', icon: 'ExternalLink'},
+    ],
+  },
+  {
+    id: 'meowzikbot',
+    title: 'Meowzik Bot',
+    descKey: 'home.meowzikbot_desc',
+    icon: 'Disc3',
+    badges: [
+      {textKey: 'home.source', href: 'https://github.com/jahirxtrap/MeowzikBot', icon: 'ExternalLink'},
     ],
   },
   {
