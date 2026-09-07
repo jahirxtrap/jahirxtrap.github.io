@@ -50,7 +50,7 @@ export const projects: Project[] = [
     descKey: 'home.cconnect_desc',
     icon: 'MonitorSmartphone',
     badges: [
-      {textKey: 'home.website', href: 'https://cconnect.pages.dev/', icon: 'ExternalLink'},
+      {textKey: 'home.website', href: 'https://cconnect.dev/', icon: 'ExternalLink'},
       {textKey: 'home.source', href: 'https://github.com/jahirxtrap/cconnect', icon: 'ExternalLink'},
       {textKey: 'home.releases', href: 'https://github.com/jahirxtrap/cconnect/releases', icon: 'ExternalLink'},
     ],
